@@ -1,0 +1,307 @@
+C51 COMPILER V9.00   DHTXX                                                                 06/27/2022 19:41:55 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE DHTXX
+OBJECT MODULE PLACED IN dhtXX.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE dhtXX.c LARGE BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "reg52.h"
+   2          #include "dhtXX.h"
+   3          # include <intrins.h>
+   4          # include <stdio.h>
+   5          unsigned int temp;
+   6          unsigned int humi;
+   7          unsigned char check;
+   8          unsigned char RH,RL,TH,TL;
+   9          
+  10          unsigned char data_byte; 
+  11          /*******************************************************************************
+  12          * 函 数 名       : void Delay10ms()             //@11.0592MHz
+  13          * 函数功能               : 软件延时函数
+  14          * 输    入       : 无
+  15          * 输    出       : 无
+  16          *******************************************************************************/
+  17          void delay(unsigned char ms) //延时模块// 
+  18          
+  19          { 
+  20   1      
+  21   1        unsigned char i; 
+  22   1      
+  23   1        while(ms--)                 
+  24   1        for(i=0;i<100;i++); 
+  25   1      
+  26   1      }
+  27          /*
+  28          void Delay10ms()                //@11.0592MHz
+  29          {
+  30                  unsigned char i, j;
+  31          
+  32                  i = 108;
+  33                  j = 145;
+  34                  do
+  35                  {
+  36                          while (--j);
+  37                  } while (--i);
+  38          }
+  39          */
+  40          void delay1()//一个for循环大概需要8个多机器周期一个机器周期为1us晶振为12MHz也就是说本函数延时8us多
+             -此延时函数必须德稍微精确一点 
+  41          
+  42          { 
+  43   1      
+  44   1        unsigned char i; 
+  45   1      
+  46   1        for(i=0;i<1;i++); 
+  47   1      
+  48   1      } 
+  49          void delay2()//27个机器周期，12M晶振，函数延时为27us 
+  50          
+  51          { 
+  52   1              _nop_();
+  53   1              _nop_();
+  54   1              _nop_();
+C51 COMPILER V9.00   DHTXX                                                                 06/27/2022 19:41:55 PAGE 2   
+
+  55   1              _nop_();
+  56   1              _nop_();
+  57   1              _nop_();
+  58   1              _nop_();
+  59   1              _nop_();
+  60   1              _nop_();
+  61   1              _nop_();
+  62   1              _nop_();
+  63   1              _nop_();
+  64   1              _nop_();
+  65   1              _nop_();
+  66   1              _nop_();
+  67   1              _nop_();
+  68   1              _nop_();
+  69   1              _nop_();
+  70   1              _nop_();
+  71   1              _nop_();
+  72   1              _nop_();
+  73   1              _nop_();
+  74   1              _nop_();
+  75   1              _nop_();
+  76   1              _nop_();
+  77   1              _nop_();
+  78   1              _nop_();
+  79   1      } 
+  80          /*******************************************************************************
+  81          * 函 数 名       : void Start(void)
+  82          * 函数功能               : 起始信号
+  83          * 输    入       : 无
+  84          * 输    出       : 无
+  85          *******************************************************************************/
+  86          void start()//开始信号 
+  87          
+  88          { 
+  89   1      
+  90   1        DAT=1; 
+  91   1      
+  92   1        delay1(); 
+  93   1      
+  94   1        DAT=0; 
+  95   1      
+  96   1        delay(25);// 主机把总线拉低必须大于18ms保证DHT11能检测到起始信号 
+  97   1      
+  98   1        DAT=1;    //发送开始信号结束后拉高电平延时20-40us 
+  99   1      
+ 100   1        delay2();//以下三个延时函数差不多为24us符合要求 
+ 101   1      } 
+ 102          
+ 103          
+ 104          /*void Start(void)
+ 105          {
+ 106                  DAT = 0;
+ 107                  Delay10ms();
+ 108                  Delay10ms();
+ 109                  DAT = 1;
+ 110          }
+ 111          */
+ 112          /*******************************************************************************
+ 113          * 函 数 名       : unsigned char ReadByte(void)
+ 114          * 函数功能               : 读取一个字节数据
+ 115          * 输    入       : 无
+ 116          * 输    出       : 无
+C51 COMPILER V9.00   DHTXX                                                                 06/27/2022 19:41:55 PAGE 3   
+
+ 117          *******************************************************************************/
+ 118          
+ 119          /*unsigned char ReadOneByte(void)
+ 120          {
+ 121                  unsigned char i,j=0,dat=0;
+ 122                  for(i=0;i<8;i++)
+ 123                  {
+ 124                          while(!DAT);            // 等待高电平
+ 125                          while(DAT)                      // 高电平持续时间计算
+ 126                          {
+ 127                                  i++;                    // 一个循环为5个指令周期，约5us
+ 128                                  
+ 129                          }
+ 130                          if(i>6)                 // 0--24~28us；1 >70us                          
+ 131                          {
+ 132                                  dat|=0x01;
+ 133                          }
+ 134                          dat<<=1;                
+ 135                  }
+ 136                  return dat;
+ 137          }
+ 138          */
+ 139          
+ 140          
+ 141          unsigned char receive_byte()//接收一个字节// 
+ 142          
+ 143          { 
+ 144   1      
+ 145   1        unsigned char i,temp; 
+ 146   1      
+ 147   1        for(i=0;i<8;i++)//接收8bit的数据 
+ 148   1      
+ 149   1        { 
+ 150   2      
+ 151   2              while(!DAT);//等待50us的低电平开始信号结束 
+ 152   2      
+ 153   2              delay2();//开始信号结束之后延时26us-28us以下三个延时函数  
+ 154   2      
+ 155   2              temp=0;//时间为26us-28us表示接收的为数据'0' 
+ 156   2      
+ 157   2              if(DAT==1) 
+ 158   2      
+ 159   2               temp=1; //如果26us-28us之后还为高电平则表示接收的数据为'1' 
+ 160   2      
+ 161   2          while(DAT);//等待数据信号高电平'0'为26us-28us'1'为70us 
+ 162   2      
+ 163   2              data_byte<<=1;//接收的数据为高位在前右移 
+ 164   2      
+ 165   2               data_byte|=temp; 
+ 166   2      
+ 167   2        } 
+ 168   1      
+ 169   1        return data_byte; 
+ 170   1      } 
+ 171          
+ 172          /*******************************************************************************
+ 173          * 函 数 名       : void Start(void)
+ 174          * 函数功能               : 起始信号
+ 175          * 输    入       : 无
+ 176          * 输    出       : 无
+ 177          *******************************************************************************/
+ 178          //void ReadData(unsigned int *temp,unsigned int *humi)
+C51 COMPILER V9.00   DHTXX                                                                 06/27/2022 19:41:55 PAGE 4   
+
+ 179          /*
+ 180          void ReadData(void)
+ 181          {
+ 182                  unsigned char i;
+ 183                  unsigned int t,h,add;
+ 184                  Start();
+ 185                  while(DAT);                             // 等待响应
+ 186                  while(!DAT)
+ 187                  {
+ 188                                  
+ 189                          i++;
+ 190                  }
+ 191                  if(i<15)                                // 响应信号应为80us
+ 192                  {
+ 193                          
+ 194                          return;
+ 195                  }
+ 196                  while(DAT);                             // 等待发送数据
+ 197                  h = ReadOneByte();                      // 读取温度高8位
+ 198                  h<<=8;   
+ 199                  h+= ReadOneByte();                      // 读取温度低8位
+ 200                  t = ReadOneByte();                      // 读取湿度高8位
+ 201                  t<<=8;
+ 202                  t+= ReadOneByte();                      // 读取湿度低8位
+ 203                  check = ReadOneByte();          // 读取校验码
+ 204                  add = (t>>8)+(t&0xff)+(h>>8)+(h&0xff);          // 求校验码
+ 205                  if(check!=(add&0xff))           // 检验校验码是否正确
+ 206                  {
+ 207                          return;
+ 208                  }
+ 209                  if (DHT==1)                                     // DHT11数据转换
+ 210                  temp = t>>8;
+ 211                  humi = h>>8;
+ 212                  LED = 0;
+ 213          
+ 214          }
+ 215          */
+ 216          
+ 217          
+ 218          void receive()//接收数据 
+ 219          
+ 220          { 
+ 221   1      
+ 222   1        unsigned char T_H,T_L,R_H,R_L,check,num_check,i; 
+ 223   1      
+ 224   1        start();//开始信号// 
+ 225   1      
+ 226   1        DAT=1;   //主机设为输入判断从机DHT11响应信号 
+ 227   1      
+ 228   1        if(!DAT)//判断从机是否有低电平响应信号// 
+ 229   1      
+ 230   1        {  
+ 231   2              while(!DAT);//判断从机发出 80us 的低电平响应信号是否结束 
+ 232   2      
+ 233   2              while(DAT);//判断从机发出 80us 的高电平是否结束如结束则主机进入数据接收状态 
+ 234   2      
+ 235   2              R_H=receive_byte();//湿度高位 
+ 236   2      
+ 237   2              R_L=receive_byte();//湿度低位 
+ 238   2      
+ 239   2              T_H=receive_byte();//温度高位 
+ 240   2      
+C51 COMPILER V9.00   DHTXX                                                                 06/27/2022 19:41:55 PAGE 5   
+
+ 241   2              T_L=receive_byte();//温度低位 
+ 242   2      
+ 243   2              check=receive_byte();//校验位 
+ 244   2      
+ 245   2              DAT=0; //当最后一bit数据接完毕后从机拉低电平50us// 
+ 246   2      
+ 247   2              for(i=0;i<7;i++)//差不多50us的延时 
+ 248   2      
+ 249   2              delay1(); 
+ 250   2      
+ 251   2              DAT=1;//总线由上拉电阻拉高进入空闲状态 
+ 252   2      
+ 253   2              num_check=R_H+R_L+T_H+T_L; 
+ 254   2      
+ 255   2              if(num_check==check)//判断读到的四个数据之和是否与校验位相同 
+ 256   2      
+ 257   2              { 
+ 258   3      
+ 259   3                 RH=R_H; 
+ 260   3              
+ 261   3                 RL=R_L; 
+ 262   3              
+ 263   3                 TH=T_H; 
+ 264   3              
+ 265   3                 TL=T_L; 
+ 266   3      
+ 267   3                 check=num_check; 
+ 268   3      
+ 269   3              } 
+ 270   2      
+ 271   2        } 
+ 272   1      
+ 273   1      
+ 274   1      }
+ 275          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    189    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     10    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

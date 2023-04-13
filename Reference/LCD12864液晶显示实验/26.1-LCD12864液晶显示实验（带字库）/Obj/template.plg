@@ -1,0 +1,21 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\86182\Desktop\26-LCD12864液晶显示实验\26.1-LCD12864液晶显示实验（带字库）\template.uvproj
+Project File Date:  05/25/2021
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling main.c...
+compiling lcd12864.c...
+compiling public.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD12864_CLEAR?LCD12864
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY_10US?PUBLIC
+Program Size: data=12.0 xdata=0 code=374
+creating hex file from ".\Obj\template"...
+".\Obj\template" - 0 Error(s), 2 Warning(s).

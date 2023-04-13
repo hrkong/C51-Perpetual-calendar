@@ -1,0 +1,310 @@
+C51 COMPILER V9.00   DS1302_LCD12864                                                       04/29/2022 16:30:18 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE DS1302_LCD12864
+OBJECT MODULE PLACED IN DS1302_LCD12864.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE DS1302_LCD12864.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /*************************************************************
+   2          程序名称：LCD12864的时钟显示（DS1302）
+   3          编              写：韦宏谋
+   4          编写时间：2011/1/20
+   5          调整FCOS：12Mhz
+   6          *************************************************************/
+   7          #include <intrins.h>
+   8          #include <DS1302.h>
+*** WARNING C318 IN LINE 8 OF DS1302_LCD12864.c: can't open file 'DS1302.h'
+   9          
+  10          #define uc      unsigned        char
+  11          #define ui      unsigned int
+  12          #define nop()   _nop_()
+  13          #define DB      P0      
+  14          
+  15          sbit RS=P2^7;                           
+*** ERROR C202 IN LINE 15 OF DS1302_LCD12864.C: 'P2': undefined identifier
+  16          sbit RW=P2^6;                   
+*** ERROR C202 IN LINE 16 OF DS1302_LCD12864.C: 'P2': undefined identifier
+  17          sbit EN=P2^5;
+*** ERROR C202 IN LINE 17 OF DS1302_LCD12864.C: 'P2': undefined identifier
+  18          sbit PSB=P2^4;
+*** ERROR C202 IN LINE 18 OF DS1302_LCD12864.C: 'P2': undefined identifier
+  19          sbit RST=P2^2;
+*** ERROR C202 IN LINE 19 OF DS1302_LCD12864.C: 'P2': undefined identifier
+  20          
+  21          uc year,month,day,week,hour,min,sec;//年月日周时分秒变量
+  22          
+  23          void delay(uc t)
+  24          {
+  25   1              uc i,j;
+  26   1              for(i=0;i<t;i++)
+  27   1                      for(j=0;j<121;j++)      nop();
+  28   1      }
+  29          //SCK的上升沿写入数据，下降沿读取数据，数据均是先低位，后高位
+  30          //写函数
+  31          void DS1302_Write_Byte(uc wdata_temp) 
+  32          {
+  33   1              uc i;
+  34   1              for (i=8;i>0;i--)                               //循环8次 写入数据
+  35   1              {       
+  36   2                      SDA=wdata_temp&0x01;            //取出数据的最低位，写入数据线
+*** ERROR C202 IN LINE 36 OF DS1302_LCD12864.C: 'SDA': undefined identifier
+  37   2                      CLK=0;                                          //时钟线拉低            
+*** ERROR C202 IN LINE 37 OF DS1302_LCD12864.C: 'CLK': undefined identifier
+  38   2                      CLK=1;                                          //时钟线拉高，构成时钟的上升沿          
+*** ERROR C202 IN LINE 38 OF DS1302_LCD12864.C: 'CLK': undefined identifier
+  39   2                      wdata_temp>>=1;                 //数据右移一位                                                          
+  40   2              }
+  41   1      } 
+  42          //读函数
+  43          uc DS1302_Read_Byte(void) 
+  44          {
+  45   1              uc i;
+  46   1              uc Rdata_temp=0;
+C51 COMPILER V9.00   DS1302_LCD12864                                                       04/29/2022 16:30:18 PAGE 2   
+
+  47   1              for (i=8;i>0;i--)       //循环8次 读取数据
+  48   1              {
+  49   2                      if(SDA)   
+*** ERROR C202 IN LINE 49 OF DS1302_LCD12864.C: 'SDA': undefined identifier
+  50   2                      Rdata_temp|=0x80;               //每次传输低字节
+  51   2                      CLK=1;
+*** ERROR C202 IN LINE 51 OF DS1302_LCD12864.C: 'CLK': undefined identifier
+  52   2                      CLK=0;
+*** ERROR C202 IN LINE 52 OF DS1302_LCD12864.C: 'CLK': undefined identifier
+  53   2                      Rdata_temp>>=1;         //右移一位      
+  54   2              } 
+  55   1              return (ACC);
+*** ERROR C202 IN LINE 55 OF DS1302_LCD12864.C: 'ACC': undefined identifier
+  56   1      }
+  57          //向指定地址写数据函数
+  58          void DS1302_Write(uc address,uc dat)
+  59          {
+  60   1              CLK=0;                          nop();
+*** ERROR C202 IN LINE 60 OF DS1302_LCD12864.C: 'CLK': undefined identifier
+  61   1              DS1302_RST=0;           nop();nop();
+*** ERROR C202 IN LINE 61 OF DS1302_LCD12864.C: 'DS1302_RST': undefined identifier
+  62   1              DS1302_RST=1;                                           //启动
+*** ERROR C202 IN LINE 62 OF DS1302_LCD12864.C: 'DS1302_RST': undefined identifier
+  63   1              DS1302_Write_Byte(address);     //发送地址
+  64   1              DS1302_Write_Byte(dat);                 //发送数据
+  65   1              CLK=0;
+*** ERROR C202 IN LINE 65 OF DS1302_LCD12864.C: 'CLK': undefined identifier
+  66   1              DS1302_RST=0;                                   //恢复
+*** ERROR C202 IN LINE 66 OF DS1302_LCD12864.C: 'DS1302_RST': undefined identifier
+  67   1      }
+  68          //从指定地址读一字节数据函数
+  69          uc DS1302_Read(uc address)
+  70          {
+  71   1              uc temp=0x00;   
+  72   1              CLK=0;
+*** ERROR C202 IN LINE 72 OF DS1302_LCD12864.C: 'CLK': undefined identifier
+  73   1              DS1302_RST=0;nop();
+*** ERROR C202 IN LINE 73 OF DS1302_LCD12864.C: 'DS1302_RST': undefined identifier
+  74   1              DS1302_RST=1;nop();
+*** ERROR C202 IN LINE 74 OF DS1302_LCD12864.C: 'DS1302_RST': undefined identifier
+  75   1              DS1302_Write_Byte(address);
+  76   1              temp=DS1302_Read_Byte();
+  77   1              DS1302_RST=0;   _nop_();
+*** ERROR C202 IN LINE 77 OF DS1302_LCD12864.C: 'DS1302_RST': undefined identifier
+  78   1              CLK=0;
+*** ERROR C202 IN LINE 78 OF DS1302_LCD12864.C: 'CLK': undefined identifier
+  79   1              return (temp);                  //返回值
+  80   1      }
+  81          //读取DS1302的时间函数,并将BCD码转换为十进制
+  82          void DS1302_Read_RTC(void)
+  83          {
+  84   1              sec=    ((DS1302_Read(r_sec)&0x7f)>>4)*10       +(DS1302_Read(r_sec)&0x0f);     
+*** ERROR C202 IN LINE 84 OF DS1302_LCD12864.C: 'r_sec': undefined identifier
+  85   1              min=    ((DS1302_Read(r_min)&0x7f)>>4)*10       +(DS1302_Read(r_min)&0x0f);             
+*** ERROR C202 IN LINE 85 OF DS1302_LCD12864.C: 'r_min': undefined identifier
+  86   1              hour=   ((DS1302_Read(r_hour)&0x3f)>>4)*10      +(DS1302_Read(r_hour)&0x0f);            
+*** ERROR C202 IN LINE 86 OF DS1302_LCD12864.C: 'r_hour': undefined identifier
+  87   1              day=    (DS1302_Read(r_day)>>4)*10                              +(DS1302_Read(r_day)&0x0f);             
+*** ERROR C202 IN LINE 87 OF DS1302_LCD12864.C: 'r_day': undefined identifier
+  88   1              month=((DS1302_Read(r_month)&0x3f)>>4)*10       +(DS1302_Read(r_month)&0x0f);                   
+*** ERROR C202 IN LINE 88 OF DS1302_LCD12864.C: 'r_month': undefined identifier
+  89   1              week=   (DS1302_Read(r_week)&0x07);                     
+C51 COMPILER V9.00   DS1302_LCD12864                                                       04/29/2022 16:30:18 PAGE 3   
+
+*** ERROR C202 IN LINE 89 OF DS1302_LCD12864.C: 'r_week': undefined identifier
+  90   1              year=   ((DS1302_Read(r_year)&0xff)>>4)*10      +(DS1302_Read(r_year)&0x0f);
+*** ERROR C202 IN LINE 90 OF DS1302_LCD12864.C: 'r_year': undefined identifier
+  91   1      }
+  92          //设定DS1302的时间函数
+  93          void DS1302_Set(uc s,m,h,d,mo,y,w)      
+  94          {       
+  95   1              DS1302_Write(w_control, 0x00);
+*** ERROR C202 IN LINE 95 OF DS1302_LCD12864.C: 'w_control': undefined identifier
+  96   1              DS1302_Write(w_sec,             (s/10<<4)|(s%10));              //写秒
+*** ERROR C202 IN LINE 96 OF DS1302_LCD12864.C: 'w_sec': undefined identifier
+  97   1              DS1302_Write(w_min,             (m/10<<4)|(m%10));              //写分
+*** ERROR C202 IN LINE 97 OF DS1302_LCD12864.C: 'w_min': undefined identifier
+  98   1              DS1302_Write(w_hour,            (h/10<<4)|(h%10));              //写小时
+*** ERROR C202 IN LINE 98 OF DS1302_LCD12864.C: 'w_hour': undefined identifier
+  99   1              DS1302_Write(w_day,             (d/10<<4)|(d%10));              //写日
+*** ERROR C202 IN LINE 99 OF DS1302_LCD12864.C: 'w_day': undefined identifier
+ 100   1              DS1302_Write(w_month,   (mo/10<<4)|(mo%10));            //写月
+*** ERROR C202 IN LINE 100 OF DS1302_LCD12864.C: 'w_month': undefined identifier
+ 101   1              DS1302_Write(w_year,            (y/10<<4)|(y%10));              //写年 
+*** ERROR C202 IN LINE 101 OF DS1302_LCD12864.C: 'w_year': undefined identifier
+ 102   1              DS1302_Write(w_week,            (w/10<<4)|(w%10));              //写星期
+*** ERROR C202 IN LINE 102 OF DS1302_LCD12864.C: 'w_week': undefined identifier
+ 103   1              DS1302_Write(w_control, 0x80);  //设置DS1302寄存器禁止写入数据
+*** ERROR C202 IN LINE 103 OF DS1302_LCD12864.C: 'w_control': undefined identifier
+ 104   1      }
+ 105          //12864判断忙碌状态
+ 106          void LCD_busy_check()                   
+ 107          {
+ 108   1              RS=0;
+*** ERROR C202 IN LINE 108 OF DS1302_LCD12864.C: 'RS': undefined identifier
+ 109   1              RW=1;
+*** ERROR C202 IN LINE 109 OF DS1302_LCD12864.C: 'RW': undefined identifier
+ 110   1              delay(1);
+ 111   1              EN=1;
+*** ERROR C202 IN LINE 111 OF DS1302_LCD12864.C: 'EN': undefined identifier
+ 112   1              DB=0xff;
+*** ERROR C202 IN LINE 112 OF DS1302_LCD12864.C: 'P0': undefined identifier
+ 113   1              while((DB&0x80)==0x80);
+*** ERROR C202 IN LINE 113 OF DS1302_LCD12864.C: 'P0': undefined identifier
+ 114   1              EN=0;
+*** ERROR C202 IN LINE 114 OF DS1302_LCD12864.C: 'EN': undefined identifier
+ 115   1      }
+ 116          //12864写命令
+ 117          void LCD_w_com(uc comm)                                                                                                           
+ 118          {
+ 119   1              LCD_busy_check();
+ 120   1              RS=0;
+*** ERROR C202 IN LINE 120 OF DS1302_LCD12864.C: 'RS': undefined identifier
+ 121   1              RW=0;
+*** ERROR C202 IN LINE 121 OF DS1302_LCD12864.C: 'RW': undefined identifier
+ 122   1              EN=1;   
+*** ERROR C202 IN LINE 122 OF DS1302_LCD12864.C: 'EN': undefined identifier
+ 123   1              DB=comm;        
+*** ERROR C202 IN LINE 123 OF DS1302_LCD12864.C: 'P0': undefined identifier
+ 124   1              delay(1);               
+ 125   1              EN=0;   
+*** ERROR C202 IN LINE 125 OF DS1302_LCD12864.C: 'EN': undefined identifier
+ 126   1              delay(1);                       //给EN高脉冲
+ 127   1      }
+ 128          //12864写数据
+ 129          void LCD_w_data(int dat)        
+C51 COMPILER V9.00   DS1302_LCD12864                                                       04/29/2022 16:30:18 PAGE 4   
+
+ 130          {
+ 131   1              LCD_busy_check();
+ 132   1              RS=1;
+*** ERROR C202 IN LINE 132 OF DS1302_LCD12864.C: 'RS': undefined identifier
+ 133   1              RW=0;
+*** ERROR C202 IN LINE 133 OF DS1302_LCD12864.C: 'RW': undefined identifier
+ 134   1              EN=1;
+*** ERROR C202 IN LINE 134 OF DS1302_LCD12864.C: 'EN': undefined identifier
+ 135   1              DB=dat; 
+*** ERROR C202 IN LINE 135 OF DS1302_LCD12864.C: 'P0': undefined identifier
+ 136   1              delay(1);       
+ 137   1              EN=0;
+*** ERROR C202 IN LINE 137 OF DS1302_LCD12864.C: 'EN': undefined identifier
+ 138   1              delay(1);                       //给EN高脉冲
+ 139   1      }
+ 140          //写字符
+ 141          void LCD_w_hz(uc x,uc y,uc code *s)
+ 142          {
+ 143   1              LCD_busy_check();
+ 144   1              switch(x)
+ 145   1              {
+ 146   2                      case 1 :LCD_w_com(0x80|y);      break;
+ 147   2                      case 2 :LCD_w_com(0x90|y);      break;
+ 148   2                      case 3 :LCD_w_com(0x88|y);      break;
+ 149   2                      case 4 :LCD_w_com(0x98|y);      break;
+ 150   2              }
+ 151   1              while(*s>0)
+ 152   1              {
+ 153   2                      LCD_w_data(*s);
+ 154   2                      s++;
+ 155   2                      delay(1);
+ 156   2              }
+ 157   1      }
+ 158          //初始化LCD
+ 159          void LCD_init()                                 
+ 160          {
+ 161   1              delay(45);                                              //延时45ms
+ 162   1              RST=1;                                                  //复位操作
+*** ERROR C202 IN LINE 162 OF DS1302_LCD12864.C: 'RST': undefined identifier
+ 163   1              delay(1);
+ 164   1              RST=0;
+*** ERROR C202 IN LINE 164 OF DS1302_LCD12864.C: 'RST': undefined identifier
+ 165   1              delay(1);
+ 166   1              RST=1;
+*** ERROR C202 IN LINE 166 OF DS1302_LCD12864.C: 'RST': undefined identifier
+ 167   1              delay(1);
+ 168   1              LCD_w_com(0x30);        delay(5);       //选择基本指令集
+ 169   1              LCD_w_com(0x30);        delay(5);       //选择8bit数据流
+ 170   1              LCD_w_com(0x0c);        delay(5);       //显示开 及光标设置
+ 171   1              LCD_w_com(0x01);        delay(5);       //显示清屏
+ 172   1              LCD_w_com(0x06);        delay(5);       //显示光标移动设置
+ 173   1      }
+ 174          //星期显示
+ 175          void LCD_disp_week()
+ 176          {
+ 177   1              switch(week)
+ 178   1              {
+ 179   2                      case 1: LCD_w_hz(3,4,"一");     break;
+ 180   2                      case 2: LCD_w_hz(3,4,"二");     break;
+ 181   2                      case 3: LCD_w_com(0x8c);
+ 182   2                                              LCD_w_data(0xc8);
+ 183   2                                              LCD_w_data(0xfd);               break;
+C51 COMPILER V9.00   DS1302_LCD12864                                                       04/29/2022 16:30:18 PAGE 5   
+
+ 184   2                      case 4: LCD_w_hz(3,4,"四");     break;
+ 185   2                      case 5: LCD_w_hz(3,4,"五");     break;
+ 186   2                      case 6: LCD_w_hz(3,4,"六");     break;
+ 187   2                      case 7: LCD_w_hz(3,4,"日");     break;
+ 188   2                      default:        break;
+ 189   2              }
+ 190   1      }
+ 191          //时间的显示
+ 192          void LCD_disp_time()
+ 193          {
+ 194   1              LCD_w_hz(2,0,"20");
+ 195   1              LCD_w_data(year/10+0x30);
+ 196   1              LCD_w_data(year%10+0x30);
+ 197   1      
+ 198   1              LCD_w_com(0x93);
+ 199   1              LCD_w_data(month/10+0x30);
+ 200   1              LCD_w_data(month%10+0x30);
+ 201   1      
+ 202   1              LCD_w_com(0x95);
+ 203   1              LCD_w_data(day/10+0x30);
+ 204   1              LCD_w_data(day%10+0x30);
+ 205   1      
+ 206   1              LCD_disp_week();
+ 207   1      
+ 208   1              LCD_w_com(0x9a);
+ 209   1              LCD_w_data(hour/10+0x30);
+ 210   1              LCD_w_data(hour%10+0x30);
+ 211   1              LCD_w_data(':');
+ 212   1              LCD_w_data(min/10+0x30);
+ 213   1              LCD_w_data(min%10+0x30);
+ 214   1              LCD_w_data(':');
+ 215   1              LCD_w_data(sec/10+0x30);
+ 216   1              LCD_w_data(sec%10+0x30);
+ 217   1      }
+ 218          
+ 219          void main()
+ 220          {
+ 221   1              LCD_init();
+ 222   1              DS1302_Set(00,59,13,21,1,11,5);         
+ 223   1              LCD_w_hz(1,2,"今天是："); 
+ 224   1              LCD_w_hz(2,2,"年");
+ 225   1              LCD_w_hz(2,4,"月");
+ 226   1              LCD_w_hz(2,6,"日"); 
+ 227   1              LCD_w_hz(3,2,"星期");
+ 228   1              while(1)
+ 229   1              {
+ 230   2                      DS1302_Read_RTC();
+ 231   2                      LCD_disp_time();
+ 232   2              }
+ 233   1      }
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  57 ERROR(S)

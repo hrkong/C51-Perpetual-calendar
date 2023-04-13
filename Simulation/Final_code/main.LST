@@ -1,0 +1,502 @@
+C51 COMPILER V9.00   MAIN                                                                  06/27/2022 19:41:55 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE main.c LARGE BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "reg52.h"
+   2          #include "LCD12864.h"
+   3          #include "ds1302.h"
+   4          #include "dhtXX.h"
+   5          #include "key.h"
+   6          #include "beep.h"
+   7          #include "time_set.h"
+   8          
+   9          sbit MQ2 = P1^6;
+  10          struct SYS_PARAM{
+  11                  uchar set_no;
+  12                  uchar year;
+  13                  uchar month;
+  14                  uchar date;
+  15                  uchar week;
+  16                  uchar hour;
+  17                  uchar min;
+  18                  uchar sec;
+  19                  uint  temp;
+  20                  uint  humi;
+  21                  uint  hour1;
+  22                  uint  min1;
+  23          }SYSTEM = {0,22,6,27,1,18,30,0,150,740,0,0};
+  24          unsigned char temp_H,temp_L,humi_H,humi_L;
+  25          unsigned char alarm_switch_str[]=" Alarm: setting ";
+  26          unsigned char time_switch_str[]="  Time: setting ";
+  27          unsigned char setting[]="  Keep Setting  ";
+  28          _calendar g_calendar;
+  29          
+  30          uchar wk[7][2] = {{"日"},{"一"},{"二"},{"三"},{"四"},{"五"},{"六"}};
+  31          
+  32          uchar dis1[16] = {"20  /  /    节气"};                  // 显示年月日星期
+  33          uchar dis2[16] = {"    :  :    周  "};                  // 显示时分秒
+  34          uchar dis3[16] = {"温度:  . C  五月"};                  // 显示温度
+  35          uchar dis4[16] = {"湿度:  . %  廿九"};                  // 显示湿度
+  36          uchar dis5[16] = {"闹钟:  :        "};                  // 显示闹钟时间
+  37          uchar dis6[16] = {"时间:  :  PM    "};                  // PM
+  38          uchar dis7[16] = {"时间:  :  AM    "};                  // AM
+  39          uchar dis8[16] = {"    :  :    周  "};                  // 显示时分秒
+  40                                                                           
+  41          /*******************************************************************************
+  42          * 函 数 名       : void GetTime(void)
+  43          * 函数功能               : 获取时间数据
+  44          * 输    入       : 无
+  45          * 输    出       : 无
+  46          *******************************************************************************/
+  47          void GetTime(void)
+  48          {
+  49   1              unsigned char year=0X17,month=0X02,date=0X26,week=0,hour=0X21,min=0X49,sec=0X30;
+  50   1              year = ReadCommand(YEAR_READ);
+  51   1              month = ReadCommand(MONT_READ);
+  52   1              date = ReadCommand(DATE_READ);
+  53   1              week = ReadCommand(WEEK_READ);
+  54   1              hour = ReadCommand(HOUR_READ);
+  55   1              min = ReadCommand(MINU_READ);
+C51 COMPILER V9.00   MAIN                                                                  06/27/2022 19:41:55 PAGE 2   
+
+  56   1              sec = ReadCommand(SECO_READ);
+  57   1              SYSTEM.year = (year>>4)*10+(year&0x0f);
+  58   1              SYSTEM.month = (month>>4)*10+(month&0x0f);
+  59   1              SYSTEM.date = (date>>4)*10+(date&0x0f);
+  60   1              SYSTEM.week = week;
+  61   1              SYSTEM.hour = (hour>>4)*10+(hour&0x0f);
+  62   1              SYSTEM.min = (min>>4)*10+(min&0x0f);
+  63   1              SYSTEM.sec = (sec>>4)*10+(sec&0x0f);
+  64   1      }
+  65          /*******************************************************************************
+  66          * 函 数 名       : void SetTime(void)
+  67          * 函数功能               : 设置时间数据
+  68          * 输    入       : 无
+  69          * 输    出       : 无
+  70          *******************************************************************************/
+  71          void SetTime(void)
+  72          {
+  73   1              unsigned char year,month,date,week,hour,min,sec;
+  74   1      
+  75   1              year = ((g_calendar.year/10)<<4)+(g_calendar.year%10);
+  76   1              month = ((g_calendar.month/10)<<4)+(g_calendar.month%10);
+  77   1              date = ((g_calendar.day/10)<<4)+(g_calendar.day%10);
+  78   1              week = g_calendar.week;
+  79   1              hour = ((g_calendar.hour/10)<<4)+(g_calendar.hour%10);
+  80   1              min = ((g_calendar.min/10)<<4)+(g_calendar.min%10);
+  81   1              sec=((g_calendar.sec/10)<<4)+(g_calendar.sec%10);
+  82   1              WriteCommand(YEAR_WRITE,year);
+  83   1              WriteCommand(MONT_WRITE,month);
+  84   1              WriteCommand(DATE_WRITE,date);
+  85   1              WriteCommand(WEEK_WRITE,week);
+  86   1              WriteCommand(HOUR_WRITE,hour);
+  87   1              WriteCommand(MINU_WRITE,min);
+  88   1              WriteCommand(SECO_WRITE,sec);
+  89   1      }
+  90          void SetTime1(void)
+  91          {
+  92   1              unsigned char year,month,date,week,hour,min;
+  93   1      
+  94   1              year = ((g_calendar.year/10)<<4)+(g_calendar.year%10);
+  95   1              month = ((g_calendar.month/10)<<4)+(g_calendar.month%10);
+  96   1              date = ((g_calendar.day/10)<<4)+(g_calendar.day%10);
+  97   1              week = g_calendar.week;
+  98   1              hour = ((g_calendar.hour/10)<<4)+(g_calendar.hour%10);
+  99   1              min = ((g_calendar.min/10)<<4)+(g_calendar.min%10);
+ 100   1              
+ 101   1              WriteCommand(YEAR_WRITE,year);
+ 102   1              WriteCommand(MONT_WRITE,month);
+ 103   1              WriteCommand(DATE_WRITE,date);
+ 104   1              WriteCommand(WEEK_WRITE,week);
+ 105   1              WriteCommand(HOUR_WRITE,hour);
+ 106   1              WriteCommand(MINU_WRITE,min);
+ 107   1      
+ 108   1      }
+ 109          /*******************************************************************************
+ 110          * 函 数 名       : void KEY_Init(void)
+ 111          * 函数功能               : 按键初始化
+ 112          * 输    入       : 无
+ 113          * 输    出       : 无
+ 114          *******************************************************************************/
+ 115          /*void KEY_Init(void)
+ 116          {
+ 117                  IT0 = 1;
+C51 COMPILER V9.00   MAIN                                                                  06/27/2022 19:41:55 PAGE 3   
+
+ 118                  IT1 = 1;
+ 119                  EX0 = 1;
+ 120                  EX1 = 1;
+ 121                  EA = 1;
+ 122          }
+ 123            */
+ 124          
+ 125          void calendar_save_set_time(void)
+ 126          {
+ 127   1              SYSTEM.year=g_calendar.year;
+ 128   1              SYSTEM.month=g_calendar.month;
+ 129   1              SYSTEM.date=g_calendar.day;
+ 130   1              SYSTEM.week=g_calendar.week;
+ 131   1              SYSTEM.hour=g_calendar.hour;
+ 132   1              SYSTEM.min=g_calendar.min;
+ 133   1              SYSTEM.sec=g_calendar.sec;
+ 134   1              SetTime();
+ 135   1              DS1302_Init();          
+ 136   1      }
+ 137          
+ 138          void calendar_set_time(void)//时钟设置模式
+ 139          {
+ 140   1              if(g_calendar.mode==1)//时钟设置
+ 141   1              {
+ 142   2                      if(g_calendar.add==1)
+ 143   2                      {
+ 144   3                              g_calendar.add=0;       
+ 145   3                              switch(g_calendar.time_choice)
+ 146   3                              {
+ 147   4                                      case 0: g_calendar.sec++;
+ 148   4                                                      //if((g_calendar.sec&0x0f)>9)g_calendar.sec+=6;
+ 149   4                                                      if(g_calendar.sec>=0x60)g_calendar.sec=g_calendar.sec%60;
+ 150   4                                                      break;
+ 151   4                                      case 1: g_calendar.min++;
+ 152   4                                                      //if((g_calendar.min&0x0f)>9)g_calendar.min+=6;
+ 153   4                                                      if(g_calendar.min>=0x60)g_calendar.min=g_calendar.min%60;
+ 154   4                                                      break;
+ 155   4                                      case 2: g_calendar.hour++;
+ 156   4                                                      //if((g_calendar.hour&0x0f)>9)g_calendar.hour+=6;
+ 157   4                                                      if(g_calendar.hour>=0x24)g_calendar.hour=g_calendar.hour%24;
+ 158   4                                                      break;
+ 159   4                                      case 3: g_calendar.week++;
+ 160   4                                                      //if((g_calendar.week&0x0f)>9)g_calendar.week+=6;
+ 161   4                                                      if(g_calendar.week>=0x08)g_calendar.week=g_calendar.week%7;
+ 162   4                                                      break;
+ 163   4                                      case 4: g_calendar.day++;
+ 164   4                                                      //if((g_calendar.day&0x0f)>9)g_calendar.day+=6;
+ 165   4                                                      if(g_calendar.month==1||g_calendar.month==3||g_calendar.month==5||g_calendar.month==7||
+ 166   4                                                      g_calendar.month==8||g_calendar.month==10||g_calendar.month==12)
+ 167   4                                                      {
+ 168   5                                                              if(g_calendar.day>=0x32)g_calendar.day=g_calendar.day%31;       
+ 169   5                                                      }
+ 170   4                                                      else if(g_calendar.month==2)
+ 171   4                                                      {
+ 172   5                                                              g_calendar.day=g_calendar.day%28;
+ 173   5                                                      }
+ 174   4                                                      else
+ 175   4                                                      {       
+ 176   5                                                              g_calendar.day=g_calendar.day%30 ;
+ 177   5                                                      }
+ 178   4                                                      //if(g_calendar.day>=0x32)g_calendar.day=1;
+ 179   4                                                      break;
+C51 COMPILER V9.00   MAIN                                                                  06/27/2022 19:41:55 PAGE 4   
+
+ 180   4                                      case 5: g_calendar.month++;
+ 181   4                                                      if((g_calendar.month&0x0f)>9)g_calendar.month+=6;
+ 182   4                                                      if(g_calendar.month>=0x13)g_calendar.month=g_calendar.month%12;
+ 183   4                                                      break;
+ 184   4                                      case 6: g_calendar.year++;
+ 185   4                                              //      if((g_calendar.year&0x0f)>9)g_calendar.year+=6;
+ 186   4                                                      if(g_calendar.year>=0x99)g_calendar.year=0;
+ 187   4                                                      break;          
+ 188   4                              }       
+ 189   3                      }                                                                                                                               
+ 190   2              }                               
+ 191   1      }
+ 192          
+ 193          void calendar_set_alarm(void)//闹钟设置模式
+ 194          {
+ 195   1              if(g_calendar.mode==2)//闹钟设置
+ 196   1              {
+ 197   2                      if(g_calendar.add==1)
+ 198   2                      {
+ 199   3                              g_calendar.add=0;       
+ 200   3                              switch(g_calendar.time_choice)
+ 201   3                              {
+ 202   4                                      case 0: g_calendar.alarm_time[0]++;
+ 203   4                                                      //if((g_calendar.alarm_time[0]&0x0f)>9)g_calendar.alarm_time[0]+=6;
+ 204   4                                                      if(g_calendar.alarm_time[0]>=0x60)g_calendar.alarm_time[0]=g_calendar.alarm_time[0]%60;
+ 205   4                                                      break;
+ 206   4                                      case 1: g_calendar.alarm_time[1]++;
+ 207   4                                              //      if((g_calendar.alarm_time[1]&0x0f)>9)g_calendar.alarm_time[1]+=6;
+ 208   4                                                      if(g_calendar.alarm_time[1]>=0x24)g_calendar.alarm_time[1]=g_calendar.alarm_time[1]%24;
+ 209   4                                                      break; 
+ 210   4                                      case 2: g_calendar.alarm=!g_calendar.alarm;
+ 211   4                                                      break;
+ 212   4                                      case 3: g_calendar.time_choice=0;
+ 213   4                                                      break;
+ 214   4                              }       
+ 215   3                      }                                                                                                                                       
+ 216   2              }               
+ 217   1      }
+ 218          
+ 219          void delay111(uint a)
+ 220          {
+ 221   1              uchar i;
+ 222   1              while(a--)for(i=0;i<120;i++);
+ 223   1      }
+ 224          
+ 225          void main(void)
+ 226          {
+ 227   1              unsigned char key_temp=0;
+ 228   1      
+ 229   1              
+ 230   1              lcd_init();
+ 231   1              DS1302_Init();
+ 232   1              BEEP=0;
+ 233   1              MQ2=1;
+ 234   1              
+ 235   1              //KEY_Init();
+ 236   1              DAT = 1;
+ 237   1              
+ 238   1              
+ 239   1              g_calendar.mode=0;
+ 240   1              g_calendar.time_choice=0;
+ 241   1              g_calendar.add=0;
+C51 COMPILER V9.00   MAIN                                                                  06/27/2022 19:41:55 PAGE 5   
+
+ 242   1              g_calendar.alarm_time[1]=0;
+ 243   1              g_calendar.alarm_time[0]=0;
+ 244   1      
+ 245   1              g_calendar.year=SYSTEM.year;     //初始化日历时间
+ 246   1              g_calendar.month=SYSTEM.month;
+ 247   1              g_calendar.day=SYSTEM.date;
+ 248   1              g_calendar.week=SYSTEM.week;
+ 249   1              g_calendar.hour=SYSTEM.hour;
+ 250   1              g_calendar.min=SYSTEM.min;
+ 251   1              g_calendar.sec=SYSTEM.sec;
+ 252   1              SetTime();
+ 253   1              
+ 254   1              while(1)
+ 255   1              {
+ 256   2                      key_temp=key_scan(0);
+ 257   2                      if(key_temp==KEY2_PRESS)
+ 258   2                      {
+ 259   3                              lcd_init();
+ 260   3                              beep_alarm(100,10);
+ 261   3                              g_calendar.mode++;
+ 262   3                      
+ 263   3                              g_calendar.setok=0;
+ 264   3                              g_calendar.time_choice=0;
+ 265   3                              
+ 266   3                              if(g_calendar.mode==1)
+ 267   3                              {
+ 268   4                                      lcd_init();
+ 269   4                                      lcd12864_printf(1,0,16,time_switch_str);
+ 270   4                                      delay111(2000); 
+ 271   4                              }
+ 272   3                              if(g_calendar.mode==2)
+ 273   3                              {
+ 274   4                                      calendar_save_set_time();
+ 275   4                                      lcd_init();
+ 276   4                                      lcd12864_printf(1,0,16,alarm_switch_str);
+ 277   4                                      delay111(2000); 
+ 278   4                              }                       
+ 279   3                      }
+ 280   2                      else if(key_temp==KEY3_PRESS)//进入设置模式时，对应位选择设置
+ 281   2                      {
+ 282   3                              g_calendar.time_choice++;
+ 283   3                              if(g_calendar.time_choice==7)
+ 284   3                                      g_calendar.time_choice=0;
+ 285   3                              beep_alarm(100,10);                     
+ 286   3                      }
+ 287   2                      else if(key_temp==KEY4_PRESS)//进入设置模式时，进行数据加操作
+ 288   2                      {
+ 289   3                              g_calendar.add=1;
+ 290   3                              beep_alarm(100,10);
+ 291   3                      }
+ 292   2                      if(g_calendar.mode==3)//设置完成，恢复正常显示模式
+ 293   2                      {
+ 294   3                              //beep_alarm(100,10);
+ 295   3                              lcd_init();
+ 296   3                              lcd12864_printf(1,0,16,setting);                        
+ 297   3                              delay111(2000);
+ 298   3                              g_calendar.mode=0;
+ 299   3                              g_calendar.setok=1;
+ 300   3                              g_calendar.time_choice=0;                       
+ 301   3                              calendar_save_set_time();
+ 302   3                      }
+ 303   2      
+C51 COMPILER V9.00   MAIN                                                                  06/27/2022 19:41:55 PAGE 6   
+
+ 304   2                      if(g_calendar.mode==1)//模拟光标闪烁
+ 305   2                      {
+ 306   3                              if(g_calendar.time_choice==0)
+ 307   3                                      lcd12864_printf(2,4,2," ");
+ 308   3                              else if(g_calendar.time_choice==1)
+ 309   3                              {
+ 310   4                                      dis8[2] = SYSTEM.hour/10+'0';
+ 311   4                                      dis8[3] = SYSTEM.hour%10+'0';
+ 312   4                                      dis8[5] = ' ';
+ 313   4                                      dis8[6] = ' ';
+ 314   4                                      dis8[8] = SYSTEM.sec/10+'0';
+ 315   4                                      dis8[9] = SYSTEM.sec%10+'0';
+ 316   4                                      lcd12864_printf(2,0,16,dis8);
+ 317   4                                      lcd12864_printf(2,7,2,wk[SYSTEM.week]);
+ 318   4                              }
+ 319   3                              else if(g_calendar.time_choice==2)
+ 320   3                              {
+ 321   4                                  lcd12864_printf(2,1,2," ");
+ 322   4                              }
+ 323   3                              else if(g_calendar.time_choice==3)
+ 324   3                              {
+ 325   4                                      
+ 326   4                                      lcd12864_printf(2,7,2," ");
+ 327   4                              }
+ 328   3                              else if(g_calendar.time_choice==4)
+ 329   3                              {
+ 330   4                                      
+ 331   4                                      lcd12864_printf(1,4,2," ");
+ 332   4                              }
+ 333   3                              else if(g_calendar.time_choice==5)
+ 334   3                              {
+ 335   4                                      dis1[2] = SYSTEM.year/10+'0';
+ 336   4                                      dis1[3] = SYSTEM.year%10+'0';
+ 337   4                                      dis1[5] = ' ';
+ 338   4                                      dis1[6] = ' ';
+ 339   4                                      dis1[8] = SYSTEM.date/10+'0';
+ 340   4                                      dis1[9] = SYSTEM.date%10+'0';
+ 341   4                                      lcd12864_printf(1,0,16,dis1);
+ 342   4                              }
+ 343   3                              else if(g_calendar.time_choice==6)
+ 344   3                              {
+ 345   4                                      
+ 346   4                                      lcd12864_printf(1,1,2," ");
+ 347   4                              }       
+ 348   3                              SetTime1();
+ 349   3                      }
+ 350   2                      if(g_calendar.mode==2)
+ 351   2                      {
+ 352   3                              if(g_calendar.time_choice==0)
+ 353   3                              {
+ 354   4                                      lcd12864_printf(1,4,2," ");
+ 355   4                              }
+ 356   3                              else if(g_calendar.time_choice==1)
+ 357   3                              {
+ 358   4                                      dis5[5]=' ';
+ 359   4                                      dis5[6]=' ';
+ 360   4                                      dis5[8]=g_calendar.alarm_time[0]/10+'0';
+ 361   4                                      dis5[9]=g_calendar.alarm_time[0]%10+'0';
+ 362   4                                      lcd12864_printf(1,0,16,dis5);
+ 363   4                              }       
+ 364   3                      }
+ 365   2      
+C51 COMPILER V9.00   MAIN                                                                  06/27/2022 19:41:55 PAGE 7   
+
+ 366   2                      calendar_set_time();
+ 367   2                      calendar_set_alarm();
+ 368   2                              
+ 369   2      
+ 370   2                      
+ 371   2                      //SetTime();
+ 372   2                      GetTime();
+ 373   2      
+ 374   2                      receive();                      //获取温湿度
+ 375   2                      temp_H=TH;      
+ 376   2                  temp_L=TL;  
+ 377   2                  humi_H=RH;  
+ 378   2                  humi_L=RL;
+ 379   2      
+ 380   2                      dis1[2] = SYSTEM.year/10+'0';
+ 381   2                      dis1[3] = SYSTEM.year%10+'0';
+ 382   2                      dis1[5] = SYSTEM.month/10+'0';
+ 383   2                      dis1[6] = SYSTEM.month%10+'0';
+ 384   2                      dis1[8] = SYSTEM.date/10+'0';
+ 385   2                      dis1[9] = SYSTEM.date%10+'0';
+ 386   2      
+ 387   2                      
+ 388   2                      dis2[2] = SYSTEM.hour/10+'0';
+ 389   2                      dis2[3] = SYSTEM.hour%10+'0';
+ 390   2                      dis2[5] = SYSTEM.min/10+'0';
+ 391   2                      dis2[6] = SYSTEM.min%10+'0';
+ 392   2                      dis2[8] = SYSTEM.sec/10+'0';
+ 393   2                      dis2[9] = SYSTEM.sec%10+'0';
+ 394   2                      
+ 395   2              
+ 396   2                      dis3[5] = temp_H/10+'0';
+ 397   2                      dis3[6] = temp_H%10+'0';
+ 398   2                      dis3[8] = temp_L/10+'0';
+ 399   2                      
+ 400   2                      
+ 401   2                      dis4[5] = humi_H/10+'0';
+ 402   2                      dis4[6] = humi_H%10+'0';
+ 403   2                      dis4[8] = humi_L/10+'0';
+ 404   2      
+ 405   2                      dis5[5]=g_calendar.alarm_time[1]/10+'0';
+ 406   2                      dis5[6]=g_calendar.alarm_time[1]%10+'0';
+ 407   2                      dis5[8]=g_calendar.alarm_time[0]/10+'0';
+ 408   2                      dis5[9]=g_calendar.alarm_time[0]%10+'0';
+ 409   2      
+ 410   2                      
+ 411   2      
+ 412   2                      
+ 413   2      
+ 414   2                      if(g_calendar.mode==2)
+ 415   2                      {
+ 416   3                              lcd12864_printf(1,0,16,dis5);
+ 417   3                              if(SYSTEM.hour>=12)
+ 418   3                              {
+ 419   4                                      SYSTEM.hour1=SYSTEM.hour-12;
+ 420   4                                      SYSTEM.min1=SYSTEM.min;
+ 421   4                                      dis6[5]=SYSTEM.hour1/10+'0';
+ 422   4                                      dis6[6]=SYSTEM.hour1%10+'0';
+ 423   4                                      dis6[8]=SYSTEM.min1/10+'0';
+ 424   4                                      dis6[9]=SYSTEM.min1%10+'0';
+ 425   4                                      lcd12864_printf(2,0,16,dis6);   
+ 426   4                              }
+ 427   3                              else
+C51 COMPILER V9.00   MAIN                                                                  06/27/2022 19:41:55 PAGE 8   
+
+ 428   3                              {
+ 429   4                                      SYSTEM.hour1=SYSTEM.hour;
+ 430   4                                      SYSTEM.min1=SYSTEM.min;
+ 431   4                                      dis7[5]=SYSTEM.hour1/10+'0';
+ 432   4                                      dis7[6]=SYSTEM.hour1%10+'0';
+ 433   4                                      dis7[8]=SYSTEM.min1/10+'0';
+ 434   4                                      dis7[9]=SYSTEM.min1%10+'0';
+ 435   4                                      lcd12864_printf(2,0,16,dis7);   
+ 436   4                              }
+ 437   3                      }               
+ 438   2                      else
+ 439   2                      {       
+ 440   3                              //calendar_save_set_time();
+ 441   3                              lcd12864_printf(1,0,16,dis1);
+ 442   3                              lcd12864_printf(2,0,16,dis2);
+ 443   3                              lcd12864_printf(2,7,2,wk[SYSTEM.week]);  //第一个数字表示第几行，第二个数字表示从哪里开始，第三个长度
+ 444   3                              lcd12864_printf(3,0,16,dis3);
+ 445   3                              lcd12864_printf(4,0,16,dis4);           
+ 446   3                      }
+ 447   2                      
+ 448   2      
+ 449   2                      if(g_calendar.hour==g_calendar.alarm_time[1]&&g_calendar.min==g_calendar.alarm_time[0])
+ 450   2                      {
+ 451   3                                      beep_alarm(300000,10);
+ 452   3                      }
+ 453   2                      
+ 454   2                      if(MQ2==1)
+ 455   2                      {
+ 456   3                              delay_ms(5);
+ 457   3                              if(MQ2==1)
+ 458   3                              {
+ 459   4                                       //beep_alarm(100,10);
+ 460   4                              }
+ 461   3                                      //beep_alarm(6000000,10);                       
+ 462   3                      }
+ 463   2              }
+ 464   1      }
+ 465          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2693    ----
+   CONSTANT SIZE    =      2    ----
+   XDATA SIZE       =    231      18
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

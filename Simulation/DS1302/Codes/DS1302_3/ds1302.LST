@@ -1,0 +1,121 @@
+C51 COMPILER V9.00   DS1302                                                                04/30/2022 15:18:02 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE DS1302
+OBJECT MODULE PLACED IN ds1302.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE ds1302.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "reg51.h"
+   2          #include "intrins.h"
+   3          #include "ds1302.h"
+   4          /*******************************************************************************
+   5          * 函 数 名       : unsigned char ReadByte(void)
+   6          * 函数功能               : 读取一字节数
+   7          * 输    入       : 无
+   8          * 输    出       : 读取的数值
+   9          *******************************************************************************/
+  10          unsigned char ReadByte(void)
+  11          {
+  12   1              unsigned char dat=0;
+  13   1              unsigned char i;
+  14   1              SDA = 1;
+  15   1              for(i=0;i<8;i++)                        // 读取一字节，8比特
+  16   1              {
+  17   2                      SCK = 0;                                // 下降沿读取
+  18   2                      _nop_();_nop_();
+  19   2                      if(SDA)
+  20   2                              dat |= 1<<i;
+  21   2                      _nop_();_nop_();
+  22   2                      SDA=1;
+  23   2                      SCK = 1;
+  24   2                      _nop_();_nop_();
+  25   2              }
+  26   1              SCK = 0;
+  27   1      
+  28   1              return dat;                                     // 返回读取值
+  29   1      }
+  30          /*******************************************************************************
+  31          * 函 数 名       : void WriteByte(unsigned char dat)
+  32          * 函数功能               : 写入一字节数
+  33          * 输    入       : dat 待写入数据
+  34          * 输    出       : 无
+  35          *******************************************************************************/
+  36          void WriteByte(unsigned char dat)
+  37          {
+  38   1              unsigned char i;
+  39   1              for(i=0;i<8;i++)                        // 写入一字节，8比特
+  40   1              {
+  41   2                      SCK = 0;
+  42   2                      _nop_();_nop_();
+  43   2                      if(dat&0X01)                    
+  44   2                              SDA = 1;
+  45   2                      else
+  46   2                              SDA = 0;
+  47   2                      _nop_();_nop_();
+  48   2                      SCK = 1;                                // 上升沿有效
+  49   2                      _nop_();_nop_();
+  50   2                      dat>>=1;                                // LSB先写入
+  51   2              }
+  52   1              SCK = 0;
+  53   1      
+  54   1      }
+  55          /*******************************************************************************
+C51 COMPILER V9.00   DS1302                                                                04/30/2022 15:18:02 PAGE 2   
+
+  56          * 函 数 名       : void WriteCommand(unsigned char Add,unsigned char Dat)
+  57          * 函数功能               : 写入时间
+  58          * 输    入       : Add 待写入数据地址，Dat 待写入数据
+  59          * 输    出       : 无
+  60          *******************************************************************************/
+  61          void WriteCommand(unsigned char Add,unsigned char Dat)
+  62          {
+  63   1              CE = 1;                         // 使能
+  64   1              WriteByte(Add);         // 写入地址
+  65   1              WriteByte(Dat);         // 写入数据
+  66   1              CE = 0;
+  67   1      }
+  68          /*******************************************************************************
+  69          * 函 数 名       : unsigned char ReadCommand(unsigned char Add)
+  70          * 函数功能               : 读取时间
+  71          * 输    入       : Add 待读取数据地址
+  72          * 输    出       : 读取数据
+  73          *******************************************************************************/
+  74          unsigned char ReadCommand(unsigned char Add)
+  75          {
+  76   1              unsigned char dat = 0;
+  77   1              CE = 1;                                 // 使能
+  78   1              WriteByte(Add);                 // 写入待读取数据地址
+  79   1              dat = ReadByte();               // 读取数据     
+  80   1              CE = 0;
+  81   1              return dat;
+  82   1      }
+  83          /*******************************************************************************
+  84          * 函 数 名       : void DS1302_Init(void)
+  85          * 函数功能               : DS1302初始化数据
+  86          * 输    入       : 无
+  87          * 输    出       : 无
+  88          *******************************************************************************/
+  89          void DS1302_Init(void)
+  90          {
+  91   1              CE = 0;
+  92   1              SCK = 0;
+  93   1              WriteCommand(0x8E,0);                           // 去写保护
+  94   1              WriteCommand(SECO_WRITE,0X00);          // 工作在正常模式
+  95   1              
+  96   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    115    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

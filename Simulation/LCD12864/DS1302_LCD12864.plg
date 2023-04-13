@@ -1,0 +1,70 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\86182\Desktop\DS1302_LCD12864\DS1302_LCD12864.uvproj
+Project File Date:  04/25/2022
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling DS1302_LCD12864.c...
+DS1302_LCD12864.c(8): warning C318: can't open file 'DS1302.h'
+DS1302_LCD12864.C(15): error C202: 'P2': undefined identifier
+DS1302_LCD12864.C(16): error C202: 'P2': undefined identifier
+DS1302_LCD12864.C(17): error C202: 'P2': undefined identifier
+DS1302_LCD12864.C(18): error C202: 'P2': undefined identifier
+DS1302_LCD12864.C(19): error C202: 'P2': undefined identifier
+DS1302_LCD12864.C(36): error C202: 'SDA': undefined identifier
+DS1302_LCD12864.C(37): error C202: 'CLK': undefined identifier
+DS1302_LCD12864.C(38): error C202: 'CLK': undefined identifier
+DS1302_LCD12864.C(49): error C202: 'SDA': undefined identifier
+DS1302_LCD12864.C(51): error C202: 'CLK': undefined identifier
+DS1302_LCD12864.C(52): error C202: 'CLK': undefined identifier
+DS1302_LCD12864.C(55): error C202: 'ACC': undefined identifier
+DS1302_LCD12864.C(60): error C202: 'CLK': undefined identifier
+DS1302_LCD12864.C(61): error C202: 'DS1302_RST': undefined identifier
+DS1302_LCD12864.C(62): error C202: 'DS1302_RST': undefined identifier
+DS1302_LCD12864.C(65): error C202: 'CLK': undefined identifier
+DS1302_LCD12864.C(66): error C202: 'DS1302_RST': undefined identifier
+DS1302_LCD12864.C(72): error C202: 'CLK': undefined identifier
+DS1302_LCD12864.C(73): error C202: 'DS1302_RST': undefined identifier
+DS1302_LCD12864.C(74): error C202: 'DS1302_RST': undefined identifier
+DS1302_LCD12864.C(77): error C202: 'DS1302_RST': undefined identifier
+DS1302_LCD12864.C(78): error C202: 'CLK': undefined identifier
+DS1302_LCD12864.C(84): error C202: 'r_sec': undefined identifier
+DS1302_LCD12864.C(85): error C202: 'r_min': undefined identifier
+DS1302_LCD12864.C(86): error C202: 'r_hour': undefined identifier
+DS1302_LCD12864.C(87): error C202: 'r_day': undefined identifier
+DS1302_LCD12864.C(88): error C202: 'r_month': undefined identifier
+DS1302_LCD12864.C(89): error C202: 'r_week': undefined identifier
+DS1302_LCD12864.C(90): error C202: 'r_year': undefined identifier
+DS1302_LCD12864.C(95): error C202: 'w_control': undefined identifier
+DS1302_LCD12864.C(96): error C202: 'w_sec': undefined identifier
+DS1302_LCD12864.C(97): error C202: 'w_min': undefined identifier
+DS1302_LCD12864.C(98): error C202: 'w_hour': undefined identifier
+DS1302_LCD12864.C(99): error C202: 'w_day': undefined identifier
+DS1302_LCD12864.C(100): error C202: 'w_month': undefined identifier
+DS1302_LCD12864.C(101): error C202: 'w_year': undefined identifier
+DS1302_LCD12864.C(102): error C202: 'w_week': undefined identifier
+DS1302_LCD12864.C(103): error C202: 'w_control': undefined identifier
+DS1302_LCD12864.C(108): error C202: 'RS': undefined identifier
+DS1302_LCD12864.C(109): error C202: 'RW': undefined identifier
+DS1302_LCD12864.C(111): error C202: 'EN': undefined identifier
+DS1302_LCD12864.C(112): error C202: 'P0': undefined identifier
+DS1302_LCD12864.C(113): error C202: 'P0': undefined identifier
+DS1302_LCD12864.C(114): error C202: 'EN': undefined identifier
+DS1302_LCD12864.C(120): error C202: 'RS': undefined identifier
+DS1302_LCD12864.C(121): error C202: 'RW': undefined identifier
+DS1302_LCD12864.C(122): error C202: 'EN': undefined identifier
+DS1302_LCD12864.C(123): error C202: 'P0': undefined identifier
+DS1302_LCD12864.C(125): error C202: 'EN': undefined identifier
+DS1302_LCD12864.C(132): error C202: 'RS': undefined identifier
+DS1302_LCD12864.C(133): error C202: 'RW': undefined identifier
+DS1302_LCD12864.C(134): error C202: 'EN': undefined identifier
+DS1302_LCD12864.C(135): error C202: 'P0': undefined identifier
+DS1302_LCD12864.C(137): error C202: 'EN': undefined identifier
+DS1302_LCD12864.C(162): error C202: 'RST': undefined identifier
+DS1302_LCD12864.C(164): error C202: 'RST': undefined identifier
+DS1302_LCD12864.C(166): error C202: 'RST': undefined identifier
+Target not created

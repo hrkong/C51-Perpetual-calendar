@@ -1,0 +1,121 @@
+C51 COMPILER V9.00   LCD12864                                                              06/27/2022 19:41:55 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE LCD12864
+OBJECT MODULE PLACED IN LCD12864.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE LCD12864.C LARGE BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include<intrins.h>
+   3          #include "LCD12864.h"
+   4          
+   5          
+   6          /*端口定义*/
+   7          #define LCD_data P0
+   8          sbit LCD_RS=P2^6;
+   9          sbit LCD_RW=P2^5;
+  10          sbit LCD_EN=P2^7;
+  11          sbit LCD_PSB=P3^2;
+  12          sbit LCD_RST=P3^3;
+  13          
+  14          
+  15          void delay_ms(uint x)
+  16          {
+  17   1              int i,j;
+  18   1      
+  19   1              for(j = 0; j < x; j++)
+  20   1              {
+  21   2                      for(i = 0; i < 110; i++)
+  22   2                      {
+  23   3                              ;
+  24   3                      }
+  25   2              }
+  26   1      }
+  27          
+  28          /*写指令数据到LCD
+  29          RS=L——表示DB0-DB7为显示指令数据
+  30          RW=L——表示DB0-DB7数据被write（当E=“H-L”,指令数据被写到IR或DR)
+  31          E=高脉冲
+  32          此时DB0-DB7=指令码      */
+  33          void write_cmd(uchar cmd)
+  34          {
+  35   1              LCD_RS=0;                       // 控制字
+  36   1              LCD_RW=0;                       // 写
+  37   1              LCD_EN=0;                       // 使能
+  38   1              P0=cmd;
+  39   1              delay_ms(5);
+  40   1              LCD_EN=1;                               // 写入控制字   
+  41   1              delay_ms(5);            // 写入等待
+  42   1              LCD_EN=0;                       // 失能
+  43   1      }
+  44          /*写显示数据到LCD*/
+  45          /*
+  46                  RS=H ——表示DB0-DB7为显示数据
+  47                  RW=L ——RW=L,E='H-L',DB0-DB7数据被写到IR或DR   
+  48                  E=高脉冲
+  49                  DB0-DB7=显示数据        
+  50          */
+  51          void write_dat(uchar dat)
+  52          {
+  53   1              LCD_RS=1;                       // 数据
+  54   1              LCD_RW=0;                       // 写操作
+  55   1              LCD_EN=1;                       // 使能
+C51 COMPILER V9.00   LCD12864                                                              06/27/2022 19:41:55 PAGE 2   
+
+  56   1              delay_ms(5);            // 写入等待
+  57   1              P0=dat;                         // 写入数据     
+  58   1              delay_ms(5);            
+  59   1              LCD_EN=0;                       // 失能
+  60   1      }
+  61          
+  62          /*x显示一串字符或文字*/
+  63          void lcd12864_printf(uchar x, uchar y,uchar n,uchar *buf)
+  64          {
+  65   1              uchar pos,i;
+  66   1              switch(x)
+  67   1              {
+  68   2                      case 1 : pos = 0x80+y;break;    // 第一行
+  69   2                      case 2 : pos = 0x90+y;break;    // 第二行
+  70   2                      case 3 : pos = 0x88+y;break;    // 第三行       
+  71   2                      case 4 : pos = 0x98+y;break;    // 第四行
+  72   2                      default: break;
+  73   2              }
+  74   1              write_cmd(pos);                                         // 写入位置信息
+  75   1              for(i = 0;i<n;i++)
+  76   1              {
+  77   2                      write_dat(buf[i]);                              // 写入显示数据
+  78   2              }
+  79   1      }
+  80          /*LCD初始化*/
+  81          void lcd_init()
+  82          {
+  83   1              delay_ms(10);
+  84   1              LCD_PSB=1;//并口方式
+  85   1              LCD_RST = 0;
+  86   1              delay_ms(25);
+  87   1              LCD_RST = 1;
+  88   1              write_cmd(0x30);//基本操作指令
+  89   1              delay_ms(5);
+  90   1              write_cmd(0x0C);//打开显示，光标关闭
+  91   1              //delay_ms(5);
+  92   1              write_cmd(0x06);//写入新数据后光标右移，显示屏不移动
+  93   1              //delay_ms(5);
+  94   1              write_cmd(0x01);//清除LCD显示类容
+  95   1              //delay_ms(5);
+  96   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    218    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

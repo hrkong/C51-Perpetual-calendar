@@ -1,0 +1,8 @@
+"STARTUP.obj",
+"main.obj",
+"dhtXX.obj",
+"ds1302.obj",
+"LCD12864.obj",
+"key.obj",
+"beep.obj" 
+TO "DS1302_3" 

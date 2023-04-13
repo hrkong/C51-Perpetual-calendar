@@ -1,0 +1,177 @@
+C51 COMPILER V9.00   DHT11                                                                 04/22/2022 22:19:26 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE DHT11
+OBJECT MODULE PLACED IN DHT11.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE DHT11.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include <stdio.h>
+   3          #include "DHT11.h"
+   4          #include "LCD1602.h"
+   5          
+   6          sbit DHT11_data = P3^6;
+   7          
+   8          unsigned int rec_data[4];
+   9          unsigned char rec_data_lcd0[6];
+  10          unsigned char rec_data_lcd1[6];
+  11          unsigned char rec_data_lcd2[6];
+  12          unsigned char rec_data_lcd3[6];
+  13          
+  14          
+  15          void DHT11_delay_us(unsigned char n)
+  16          {
+  17   1                      while(--n);
+  18   1      }
+  19          
+  20          void DHT11_delay_ms(unsigned int z)
+  21          {
+  22   1                      unsigned int i,j;
+  23   1                      for(i=z;i>0;i++)
+  24   1                              for(j=110;j>0;j--);
+  25   1      }
+  26          
+  27          
+  28          void DHT11_UART_Init()
+  29          {
+  30   1                      SCON = 0x40;
+  31   1                      REN  = 1;
+  32   1                      
+  33   1                      TMOD = 0x20;
+  34   1                      TH1  = 0xF3;
+  35   1                      TL1  = 0xF3;
+  36   1                      
+  37   1                      TI   = 1;
+  38   1                      TR1  = 1;
+  39   1      }
+  40          
+  41          void DHT11_Start()
+  42          {
+  43   1                      DHT11_data = 1;
+  44   1                      DHT11_delay_us(30);
+  45   1                      
+  46   1                      DHT11_data = 0;
+  47   1                      DHT11_delay_ms(20);
+  48   1                      
+  49   1                      DHT11_data = 1;
+  50   1                      DHT11_delay_us(30);
+  51   1      }
+  52          
+  53          unsigned char DHT11_Rec_Byte()
+  54          {
+  55   1                      unsigned char i = 0;
+C51 COMPILER V9.00   DHT11                                                                 04/22/2022 22:19:26 PAGE 2   
+
+  56   1                      unsigned char Data;
+  57   1                      
+  58   1                      for(i=0;i<8;i++)
+  59   1                      {
+  60   2                                      while(!DHT11_data);
+  61   2                                      DHT11_delay_us(30);
+  62   2                                      
+  63   2                                      Data<<=1;
+  64   2                                      
+  65   2                                      if(DHT11_data==1)
+  66   2                                      {
+  67   3                                                      Data+=1;
+  68   3                                      }
+  69   2                                      
+  70   2                                      while(DHT11_data);
+  71   2                      }
+  72   1                      
+  73   1                      return Data;
+  74   1      }
+  75          
+  76          void DHT11_Receive()
+  77          {
+  78   1                      unsigned int R_H,R_L,T_H,T_L;
+  79   1                      unsigned char RH,RL,TH,TL,CHECK;
+  80   1                      
+  81   1                      DHT11_Start();
+  82   1                      DHT11_data = 1;
+  83   1                      
+  84   1                      if(DHT11_data==0)
+  85   1                      {
+  86   2                                      while(DHT11_data==0);      //等待从机80us低电平响应信号过去
+  87   2                                      while(DHT11_data==1);
+  88   2                                      
+  89   2                                      R_H = DHT11_Rec_Byte();
+  90   2                                      R_L = DHT11_Rec_Byte();
+  91   2                                      T_H = DHT11_Rec_Byte();
+  92   2                                      T_L = DHT11_Rec_Byte();
+  93   2                                      CHECK = DHT11_Rec_Byte();
+  94   2                                      
+  95   2                                      DHT11_data=0;
+  96   2                                      DHT11_delay_us(25);
+  97   2                                      DHT11_data=1;
+  98   2                                      
+  99   2                                      if((R_H+R_L+T_H+T_L) == CHECK)
+ 100   2                                      {
+ 101   3                                                      RH = R_H;
+ 102   3                                                      RL = R_L;
+ 103   3                                                      TH = T_H;
+ 104   3                                                      TL = T_L;
+ 105   3                                      }
+ 106   2                      }
+ 107   1                      
+ 108   1                      rec_data[0] = RH;
+ 109   1                      rec_data[1] = RL;
+ 110   1                      rec_data[2] = TH;
+ 111   1                      rec_data[3] = TL;
+ 112   1      }
+ 113          
+ 114          
+ 115          void main()
+ 116          {
+ 117   1                      DHT11_UART_Init();
+C51 COMPILER V9.00   DHT11                                                                 04/22/2022 22:19:26 PAGE 3   
+
+ 118   1                      LCD_Init();
+ 119   1                      LCD_ShowString(1,1,"Humi:");
+ 120   1                      LCD_ShowString(2,1,"Temp:");
+ 121   1                      
+ 122   1                      while(1)
+ 123   1                      {
+ 124   2                                      DHT11_delay_ms(1000);
+ 125   2                                      DHT11_Receive();
+ 126   2                                      
+ 127   2                                      sprintf(rec_data_lcd0,"%d",rec_data[0]);
+ 128   2                                      sprintf(rec_data_lcd1,"%d",rec_data[1]);
+ 129   2                                      sprintf(rec_data_lcd2,"%d",rec_data[2]);
+ 130   2                                      sprintf(rec_data_lcd3,"%d",rec_data[3]);
+ 131   2                                      
+ 132   2                                      DHT11_delay_ms(100);
+ 133   2                                      
+ 134   2                                      LCD_ShowString(1,6,rec_data_lcd0);
+ 135   2                                      LCD_ShowString(1,8,".");
+ 136   2                                      LCD_ShowString(1,9,rec_data_lcd1);
+ 137   2                                      LCD_ShowString(1,15,"%");
+ 138   2                                      
+ 139   2                                      LCD_ShowString(2,6,rec_data_lcd2);
+ 140   2                                      LCD_ShowString(2,8,".");
+ 141   2                                      LCD_ShowString(2,9,rec_data_lcd3);
+ 142   2                                      LCD_ShowString(2,15,"C");
+ 143   2                                      
+ 144   2                                      printf("Humi:%d.%d \n",rec_data[0],rec_data[1]); //通过串口
+ 145   2                                      printf("Temp:%d.%d °C\n",rec_data[2],rec_data[3]);
+ 146   2      
+ 147   2                      }
+ 148   1      }
+ 149          
+ 150           
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    524    ----
+   CONSTANT SIZE    =     50    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     32      10
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

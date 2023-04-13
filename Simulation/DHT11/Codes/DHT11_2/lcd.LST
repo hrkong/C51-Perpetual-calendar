@@ -1,0 +1,86 @@
+C51 COMPILER V9.00   LCD                                                                   04/23/2022 11:45:18 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE LCD
+OBJECT MODULE PLACED IN lcd.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE lcd.c BROWSE DEFINE(DEBUG_ENABLE_SEMIHOST) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include"lcd.h"
+   2           
+   3          void Lcd1602_Write_Cmd(unsigned char cmd)     //写命令
+   4          {
+   5   1          //Read_Busy();
+   6   1          LCD1602_RS = 0;
+   7   1          LCD1602_RW = 0;
+   8   1          LCD1602_DB = cmd;
+   9   1                      LCD_Delay10ms(1);
+  10   1          LCD1602_EN = 1;
+  11   1                      LCD_Delay10ms(1);
+  12   1          LCD1602_EN = 0;    
+  13   1      }
+  14           
+  15          void Lcd1602_Write_Data(unsigned char dat)   //写数据
+  16          {
+  17   1            //Read_Busy();
+  18   1            LCD1602_RS = 1;
+  19   1            LCD1602_RW = 0;
+  20   1            LCD1602_DB = dat;
+  21   1                              LCD_Delay10ms(1);
+  22   1            LCD1602_EN = 1;
+  23   1                              LCD_Delay10ms(1);
+  24   1            LCD1602_EN = 0;
+  25   1      }
+  26          //指定位置开始显示数据！
+  27          void LcdSetCursor(unsigned char x,unsigned char y)  //坐标显示
+  28          {
+  29   1          unsigned char addr;
+  30   1          if(y == 0)
+  31   1              addr = 0x00 + x;//第一行开始，x表示一行的第x个
+  32   1          else
+  33   1              addr = 0x40 + x;//第二行开始，x表示一行的第x个
+  34   1          
+  35   1          Lcd1602_Write_Cmd(addr|0x80);
+  36   1      }
+  37           
+  38          void LcdShowStr(unsigned char x,unsigned char y,unsigned char *str)     //显示字符串
+  39          {
+  40   1          LcdSetCursor(x,y);      //当前字符的坐标
+  41   1          while(*str != '\0')
+  42   1          {
+  43   2              Lcd1602_Write_Data(*str++);
+  44   2          }
+  45   1      }
+  46           
+  47          void InitLcd1602()              //1602初始化
+  48          {
+  49   1          Lcd1602_Write_Cmd(0x38);    //打开，5*8,8位数据
+  50   1          Lcd1602_Write_Cmd(0x0c);
+  51   1          Lcd1602_Write_Cmd(0x06);
+  52   1          Lcd1602_Write_Cmd(0x01);    //清屏   
+  53   1      }
+  54           
+  55          void LCD_Delay10ms(unsigned int c)   //误差 0us
+C51 COMPILER V9.00   LCD                                                                   04/23/2022 11:45:18 PAGE 2   
+
+  56          {
+  57   1          unsigned char a,b;
+  58   1          for(;c>0;c--)
+  59   1              for(b=38;b>0;b--)
+  60   1                  for(a=130;a>0;a--);
+  61   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    139    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

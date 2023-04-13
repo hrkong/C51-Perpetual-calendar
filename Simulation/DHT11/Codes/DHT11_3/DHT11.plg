@@ -1,0 +1,584 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\86182\Desktop\´´ÐÂÊµ¼ù-Ó²\My project\Codes\DHT11_3\DHT11.uvproj
+Project File Date:  04/22/2022
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+linking...
+Program Size: data=19.0 xdata=0 code=493
+"DHT11" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+linking...
+Program Size: data=19.0 xdata=0 code=493
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+compiling DHT11.c...
+linking...
+Program Size: data=19.0 xdata=0 code=495
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(3): warning C318: can't open file 'delay.h'
+DHT11.C(43): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(46): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(95): warning C206: 'Delay55us': missing function-prototype
+compiling LCD1602.c...
+compiling main.c...
+MAIN.C(32): warning C206: 'DHT11_UART_Init': missing function-prototype
+MAIN.C(39): warning C206: 'Delay1000ms': missing function-prototype
+MAIN.C(40): warning C206: 'DHT11_Receive': missing function-prototype
+MAIN.C(47): warning C206: 'Delay100ms': missing function-prototype
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?DELAY500MS?MAIN
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06F3H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06F8H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06FDH
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0638H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 057EH
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY1000MS
+    MODULE:  main.obj (MAIN)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY100MS
+    MODULE:  main.obj (MAIN)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY1000MS
+    MODULE:  main.obj (MAIN)
+    ADDRESS: 0475H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY100MS
+    MODULE:  main.obj (MAIN)
+    ADDRESS: 04DBH
+Program Size: data=69.1 xdata=0 code=1847
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 23 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(3): warning C318: can't open file 'delay.h'
+DHT11.C(43): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(46): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(95): warning C206: 'Delay55us': missing function-prototype
+compiling LCD1602.c...
+compiling main.c...
+MAIN.C(32): warning C206: 'DHT11_UART_Init': missing function-prototype
+MAIN.C(39): warning C206: 'Delay1000ms': missing function-prototype
+MAIN.C(40): warning C206: 'DHT11_Receive': missing function-prototype
+MAIN.C(47): warning C206: 'Delay100ms': missing function-prototype
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?DELAY500MS?MAIN
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06F3H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06F8H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06FDH
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0638H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 057EH
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY1000MS
+    MODULE:  main.obj (MAIN)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY100MS
+    MODULE:  main.obj (MAIN)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY1000MS
+    MODULE:  main.obj (MAIN)
+    ADDRESS: 0475H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY100MS
+    MODULE:  main.obj (MAIN)
+    ADDRESS: 04DBH
+Program Size: data=69.1 xdata=0 code=1847
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 23 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(3): warning C318: can't open file 'delay.h'
+DHT11.C(43): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(46): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(95): warning C206: 'Delay55us': missing function-prototype
+compiling LCD1602.c...
+compiling main.c...
+MAIN.C(32): warning C206: 'DHT11_UART_Init': missing function-prototype
+MAIN.C(39): warning C206: 'Delay1000ms': missing function-prototype
+MAIN.C(40): warning C206: 'DHT11_Receive': missing function-prototype
+MAIN.C(47): warning C206: 'Delay100ms': missing function-prototype
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?DELAY500MS?MAIN
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06F3H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06F8H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 06FDH
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0638H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 057EH
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY1000MS
+    MODULE:  main.obj (MAIN)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY100MS
+    MODULE:  main.obj (MAIN)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY1000MS
+    MODULE:  main.obj (MAIN)
+    ADDRESS: 0475H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY100MS
+    MODULE:  main.obj (MAIN)
+    ADDRESS: 04DBH
+Program Size: data=69.1 xdata=0 code=1847
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 23 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(3): warning C318: can't open file 'delay.h'
+DHT11.C(43): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(46): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(95): warning C206: 'Delay55us': missing function-prototype
+DHT11.C(116): warning C206: '_nop_': missing function-prototype
+DHT11.C(116): error C264: intrinsic '_nop_': declaration/activation error
+compiling LCD1602.c...
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(3): warning C318: can't open file 'delay.h'
+DHT11.C(43): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(46): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(95): warning C206: 'Delay55us': missing function-prototype
+DHT11.C(116): warning C206: '_nop_': missing function-prototype
+DHT11.C(116): error C264: intrinsic '_nop_': declaration/activation error
+compiling LCD1602.c...
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(3): warning C318: can't open file 'delay.h'
+DHT11.C(43): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(46): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(95): warning C206: 'Delay55us': missing function-prototype
+DHT11.C(115): warning C206: '_nop_': missing function-prototype
+DHT11.C(115): error C264: intrinsic '_nop_': declaration/activation error
+compiling LCD1602.c...
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(4): warning C318: can't open file 'delay.h'
+DHT11.C(44): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(47): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(96): warning C206: 'Delay55us': missing function-prototype
+DHT11.C(116): warning C206: '_nop_': missing function-prototype
+DHT11.C(116): error C264: intrinsic '_nop_': declaration/activation error
+compiling LCD1602.c...
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(4): warning C318: can't open file 'delay.h'
+DHT11.C(44): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(47): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(96): warning C206: 'Delay55us': missing function-prototype
+DHT11.C(131): warning C206: 'LCD_Init': missing function-prototype
+DHT11.C(132): warning C206: 'LCD_ShowString': missing function-prototype
+DHT11.C(132): error C267: 'LCD_ShowString': requires ANSI-style prototype
+compiling LCD1602.c...
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.c(4): warning C318: can't open file 'delay.h'
+DHT11.C(45): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(48): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(97): warning C206: 'Delay55us': missing function-prototype
+DHT11.C(138): warning C206: 'Delay1000ms': missing function-prototype
+DHT11.C(146): warning C206: 'Delay100ms': missing function-prototype
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DHT11_DELAY_US?DHT11
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DHT11_DELAY_MS?DHT11
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?DELAY500MS?DHT11
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY1000MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY100MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0711H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0716H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 071BH
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0638H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 057EH
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY1000MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0475H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY100MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 04DBH
+Program Size: data=69.1 xdata=0 code=1879
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 23 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.C(44): warning C206: 'Delay30us': missing function-prototype
+DHT11.C(47): warning C206: 'Delay20ms': missing function-prototype
+DHT11.C(96): warning C206: 'Delay55us': missing function-prototype
+DHT11.C(137): warning C206: 'Delay1000ms': missing function-prototype
+DHT11.C(145): warning C206: 'Delay100ms': missing function-prototype
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DHT11_DELAY_US?DHT11
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DHT11_DELAY_MS?DHT11
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?DELAY500MS?DHT11
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY1000MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY100MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0711H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY20MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0716H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 071BH
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY30US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0638H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 057EH
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY1000MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0475H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY100MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 04DBH
+Program Size: data=69.1 xdata=0 code=1879
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 22 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.C(96): warning C206: 'Delay55us': missing function-prototype
+DHT11.C(137): warning C206: 'Delay1000ms': missing function-prototype
+DHT11.C(145): warning C206: 'Delay100ms': missing function-prototype
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?DELAY500MS?DHT11
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY1000MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY100MS
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 057EH
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY1000MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0475H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY100MS
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 04DBH
+Program Size: data=69.1 xdata=0 code=1878
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 12 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.C(96): warning C206: 'Delay55us': missing function-prototype
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 0586H
+Program Size: data=69.1 xdata=0 code=1873
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 5 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.C(96): warning C206: 'Delay55us': missing function-prototype
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 05B0H
+Program Size: data=69.1 xdata=0 code=1944
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 5 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+DHT11.C(96): warning C206: 'Delay55us': missing function-prototype
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  DELAY55US
+    MODULE:  DHT11.obj (DHT11)
+    ADDRESS: 05B0H
+Program Size: data=69.1 xdata=0 code=1944
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 5 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+Program Size: data=69.1 xdata=0 code=1940
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+Program Size: data=69.1 xdata=0 code=1937
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCHAR?LCD1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_POW?LCD1602
+Program Size: data=62.1 xdata=0 code=1791
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+compiling LCD1602.c...
+LCD1602.C(92): warning C206: 'LCD_Pow': missing function-prototype
+LCD1602.C(92): error C267: 'LCD_Pow': requires ANSI-style prototype
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWNUM?LCD1602
+Program Size: data=69.1 xdata=0 code=1927
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 1 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+compiling LCD1602.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_POW?LCD1602
+Program Size: data=62.1 xdata=0 code=1781
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 1 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling DHT11.c...
+compiling LCD1602.c...
+linking...
+Program Size: data=62.1 xdata=0 code=1737
+creating hex file from "DHT11"...
+"DHT11" - 0 Error(s), 0 Warning(s).

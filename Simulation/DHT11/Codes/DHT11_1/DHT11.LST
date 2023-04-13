@@ -1,0 +1,311 @@
+C51 COMPILER V9.00   DHT11                                                                 04/22/2022 17:01:43 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE DHT11
+OBJECT MODULE PLACED IN DHT11.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE DHT11.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /*-----------------------------------------------
+   2            显示模块引脚定义：1-VSS 2-VDD 3-V0 4-RS 5-R/W 6-E 7-14 DB0-DB7 15-BLA 16-BLK
+   3          ------------------------------------------------*/
+   4          #include <reg52.h> //包含头文件，一般情况不需要改动，头文件包含特殊功能寄存器的定义
+   5          #include <intrins.h>
+   6          #include <math.h>
+   7          #define uchar unsigned char
+   8          #define uint unsigned int       
+   9          sbit RS = P1^0;   //定义端口 
+  10          sbit RW = P1^1;
+  11          sbit EN = P2^5;
+  12          sbit DU = P2^0;
+  13          sbit WE = P2^1;
+  14           
+  15          sbit Data = P3^6;//定义数据线
+  16          uchar rec_dat[15];   //用于显示的接收数据数组
+  17           
+  18          #define RS_CLR RS=0 
+  19          #define RS_SET RS=1
+  20           
+  21          #define RW_CLR RW=0 
+  22          #define RW_SET RW=1 
+  23           
+  24          #define EN_CLR EN=0
+  25          #define EN_SET EN=1
+  26           
+  27          #define DataPort P0
+  28           
+  29           
+  30          void cmg88()//关数码管，点阵函数
+  31          {
+  32   1      DU=1;  
+  33   1      P0=0X00;
+  34   1      DU=0;
+  35   1      }
+  36          /*------------------------------------------------
+  37           uS延时函数，含有输入参数 unsigned char t，无返回值
+  38           unsigned char 是定义无符号字符变量，其值的范围是
+  39           0~255 这里使用晶振12M，精确延时请使用汇编,大致延时
+  40           长度如下 T=tx2+5 uS 
+  41          ------------------------------------------------*/
+  42          void DelayUs2x(unsigned char t)
+  43          {   
+  44   1       while(--t);
+  45   1      }
+  46          /*------------------------------------------------
+  47           mS延时函数，含有输入参数 unsigned char t，无返回值
+  48           unsigned char 是定义无符号字符变量，其值的范围是
+  49           0~255 这里使用晶振12M，精确延时请使用汇编
+  50          ------------------------------------------------*/
+  51          void DelayMs(unsigned char t)
+  52          {
+  53   1           
+  54   1       while(t--)
+  55   1       {
+C51 COMPILER V9.00   DHT11                                                                 04/22/2022 17:01:43 PAGE 2   
+
+  56   2           //大致延时1mS
+  57   2           DelayUs2x(245);
+  58   2               DelayUs2x(245);
+  59   2       }
+  60   1      }
+  61          /*------------------------------------------------
+  62                        判忙函数
+  63          ------------------------------------------------*/
+  64           bit LCD_Check_Busy(void) 
+  65           { 
+  66   1       DataPort= 0xFF; 
+  67   1       RS_CLR; 
+  68   1       RW_SET; 
+  69   1       EN_CLR; 
+  70   1       _nop_(); 
+  71   1       EN_SET;
+  72   1       return (bit)(DataPort & 0x80);
+  73   1       }
+  74          /*------------------------------------------------
+  75                        写入命令函数
+  76          ------------------------------------------------*/
+  77           void LCD_Write_Com(unsigned char com) 
+  78           {  
+  79   1       while(LCD_Check_Busy()); //忙则等待
+  80   1       RS_CLR; 
+  81   1       RW_CLR; 
+  82   1       EN_SET; 
+  83   1       DataPort= com; 
+  84   1       _nop_(); 
+  85   1       EN_CLR;
+  86   1       }
+  87          /*------------------------------------------------
+  88                        写入数据函数
+  89          ------------------------------------------------*/
+  90           void LCD_Write_Data(unsigned char Data) 
+  91           { 
+  92   1       while(LCD_Check_Busy()); //忙则等待
+  93   1       RS_SET; 
+  94   1       RW_CLR; 
+  95   1       EN_SET; 
+  96   1       DataPort= Data; 
+  97   1       _nop_();
+  98   1       EN_CLR;
+  99   1       }
+ 100           
+ 101          /*------------------------------------------------
+ 102                          清屏函数
+ 103          ------------------------------------------------*/
+ 104           void LCD_Clear(void) 
+ 105           { 
+ 106   1       LCD_Write_Com(0x01); 
+ 107   1       DelayMs(5);
+ 108   1       }
+ 109          /*------------------------------------------------
+ 110                        写入字符串函数
+ 111          ------------------------------------------------*/
+ 112           void LCD_Write_String(unsigned char x,unsigned char y,unsigned char *s) 
+ 113           {     
+ 114   1       if (y == 0) 
+ 115   1              {     
+ 116   2               LCD_Write_Com(0x80 + x);     //表示第一行
+ 117   2              }
+C51 COMPILER V9.00   DHT11                                                                 04/22/2022 17:01:43 PAGE 3   
+
+ 118   1       else 
+ 119   1              {      
+ 120   2              LCD_Write_Com(0xC0 + x);      //表示第二行
+ 121   2              }        
+ 122   1       while (*s) 
+ 123   1              {     
+ 124   2       LCD_Write_Data( *s);     
+ 125   2       s ++;     
+ 126   2              }
+ 127   1       }
+ 128          /*------------------------------------------------
+ 129                        写入字符函数
+ 130          ------------------------------------------------*/
+ 131           void LCD_Write_Char(unsigned char x,unsigned char y,unsigned char Data) 
+ 132           {     
+ 133   1       if (y == 0) 
+ 134   1              {     
+ 135   2              LCD_Write_Com(0x80 + x);     
+ 136   2              }    
+ 137   1       else 
+ 138   1              {     
+ 139   2              LCD_Write_Com(0xC0 + x);     
+ 140   2              }        
+ 141   1       LCD_Write_Data( Data);  
+ 142   1       }
+ 143          /*------------------------------------------------
+ 144                        初始化函数
+ 145          ------------------------------------------------*/
+ 146           void LCD_Init(void) 
+ 147           {
+ 148   1         LCD_Write_Com(0x38);    /*显示模式设置*/ 
+ 149   1         DelayMs(5); 
+ 150   1         LCD_Write_Com(0x38); 
+ 151   1         DelayMs(5); 
+ 152   1         LCD_Write_Com(0x38); 
+ 153   1         DelayMs(5); 
+ 154   1         LCD_Write_Com(0x38);  
+ 155   1         LCD_Write_Com(0x08);    /*显示关闭*/ 
+ 156   1         LCD_Write_Com(0x01);    /*显示清屏*/ 
+ 157   1         LCD_Write_Com(0x06);    /*显示光标移动设置*/ 
+ 158   1         DelayMs(5); 
+ 159   1         LCD_Write_Com(0x0C);    /*显示开及光标设置*/
+ 160   1         }
+ 161             
+ 162           
+ 163          /*------------------------------------------------
+ 164                        DHT11延时函数
+ 165          ------------------------------------------------*/
+ 166          void DHT11_delay_us(uchar n)
+ 167          {
+ 168   1          while(--n);
+ 169   1      }
+ 170           
+ 171          void DHT11_delay_ms(uint z)
+ 172          {
+ 173   1         uint i,j;
+ 174   1         for(i=z;i>0;i--)
+ 175   1            for(j=110;j>0;j--);
+ 176   1      }
+ 177          /*------------------------------------------------
+ 178                        DHT11开始信号
+ 179          ------------------------------------------------*/
+C51 COMPILER V9.00   DHT11                                                                 04/22/2022 17:01:43 PAGE 4   
+
+ 180          void DHT11_start()
+ 181          {
+ 182   1         Data=1;
+ 183   1         DHT11_delay_us(2);
+ 184   1         Data=0;
+ 185   1         DHT11_delay_ms(20);   //延时18ms以上
+ 186   1         Data=1;
+ 187   1         DHT11_delay_us(30);
+ 188   1      }
+ 189          /*------------------------------------------------
+ 190                        接收八位二进制
+ 191          ------------------------------------------------*/
+ 192          uchar DHT11_rec_byte()      //接收一个字节
+ 193          {
+ 194   1         uchar i,dat=0;
+ 195   1        for(i=0;i<8;i++)    //从高到低依次接收8位数据
+ 196   1         {          
+ 197   2            while(!Data);             //等待50us低电平过去
+ 198   2            DHT11_delay_us(8);     //延时60us，如果还为高则数据为1，否则为0 
+ 199   2            dat<<=1;           //移位使正确接收8位数据，数据为0时直接移位
+ 200   2            if(Data==1)    //数据为1时，使dat加1来接收数据1
+ 201   2               dat+=1;
+ 202   2            while(Data);  //等待数据线拉低    
+ 203   2          }  
+ 204   1          return dat;
+ 205   1      }
+ 206          /*------------------------------------------------
+ 207                        接收40bit数据
+ 208          ------------------------------------------------*/
+ 209          void DHT11_receive()      //接收40位的数据
+ 210          {
+ 211   1          uchar R_H,R_L,T_H,T_L,RH,RL,TH,TL,revise; 
+ 212   1          DHT11_start();
+ 213   1       
+ 214   1          if(Data==0)
+ 215   1          {
+ 216   2              
+ 217   2              while(Data==0);   //等待拉高     
+ 218   2                      
+ 219   2              DHT11_delay_us(40);  //拉高后延时80us
+ 220   2              R_H=DHT11_rec_byte();    //接收湿度高八位  
+ 221   2              R_L=DHT11_rec_byte();    //接收湿度低八位  
+ 222   2              T_H=DHT11_rec_byte();    //接收温度高八位  
+ 223   2              T_L=DHT11_rec_byte();    //接收温度低八位
+ 224   2              revise=DHT11_rec_byte(); //接收校正位
+ 225   2                               
+ 226   2              DHT11_delay_us(25);    //结束
+ 227   2       
+ 228   2              if((R_H+R_L+T_H+T_L)==revise)      //校正
+ 229   2              {
+ 230   3                  RH=R_H;
+ 231   3                  RL=R_L;
+ 232   3                  TH=T_H;
+ 233   3                  TL=T_L;
+ 234   3              } 
+ 235   2              /*数据处理，方便显示*/
+ 236   2              rec_dat[0]='0'+(RH/10);
+ 237   2              rec_dat[1]='0'+(RH%10);
+ 238   2                      rec_dat[2] =' ';
+ 239   2                      rec_dat[3] = 'R' ;
+ 240   2                      rec_dat[4] = 'H';
+ 241   2              rec_dat[5]=' ';
+C51 COMPILER V9.00   DHT11                                                                 04/22/2022 17:01:43 PAGE 5   
+
+ 242   2              rec_dat[6]=' ';
+ 243   2              rec_dat[7]=' ';
+ 244   2              rec_dat[8]=' ';
+ 245   2              rec_dat[9]='0'+(TH/10);
+ 246   2              rec_dat[10]='0'+(TH%10);
+ 247   2                      rec_dat[11] =' ';
+ 248   2                      rec_dat[12] = 'C';
+ 249   2                      rec_dat[13] = ' ' ;
+ 250   2              rec_dat[14]=' ';
+ 251   2          }
+ 252   1      }
+ 253           
+ 254           
+ 255          /*------------------------------------------------
+ 256                              主函数
+ 257          ------------------------------------------------*/ 
+ 258          void main(void) 
+ 259          { 
+ 260   1              uint i;
+ 261   1              cmg88();//关数码管，点阵函数
+ 262   1       
+ 263   1              LCD_Init(); 
+ 264   1              LCD_Clear();//清屏
+ 265   1              DHT11_delay_ms(1500);    //DHT11上电后要等待1S以越过不稳定状态在此期间不能发送任何指令
+ 266   1              while (1) 
+ 267   1              { 
+ 268   2              DHT11_receive();
+ 269   2                  
+ 270   2                
+ 271   2                      for(i=0;i<15;i++)
+ 272   2                      {
+ 273   3                              LCD_Write_Char(i,1,rec_dat[i]);
+ 274   3                      }        
+ 275   2                      //LCD_Write_Char(0,0,'T');
+ 276   2                      //LCD_Write_Char(0,1,'H');
+ 277   2                      //LCD_Write_String(0,1,"HELLO");
+ 278   2              }
+ 279   1      }
+ 280           
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    493    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

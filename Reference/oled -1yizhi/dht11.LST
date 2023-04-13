@@ -1,0 +1,149 @@
+C51 COMPILER V9.00   DHT11                                                                 05/11/2022 09:52:01 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE DHT11
+OBJECT MODULE PLACED IN dht11.OBJ
+COMPILER INVOKED BY: D:\keil 4\C51\BIN\C51.EXE dht11.c BROWSE INCDIR(.\SRC) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "dht11.h"
+   2          #include "intrins.h"
+   3          
+   4          
+   5          //DHT11初始化 
+   6          //返回0：初始化成功，1：失败
+   7          u8 DHT11_Init(void)
+   8          {
+   9   1              DHT11_DQ=1;
+  10   1              DHT11_Rst();      
+  11   1              return DHT11_Check();   
+  12   1      }
+  13          
+  14          void Delay_xus2(uint t)                                 
+  15          { 
+  16   1        for(;t>0;t--)
+  17   1         {
+  18   2               _nop_();
+  19   2         }
+  20   1      }
+  21          
+  22          void Delay_xms2(uint x)
+  23          {
+  24   1        uint i,j;
+  25   1        for(i=0;i<x;i++)
+  26   1          for(j=0;j<112;j++);
+  27   1      }
+  28          
+  29          
+  30          //复位DHT11
+  31          void DHT11_Rst(void)       
+  32          {                 
+  33   1              DHT11_DQ=1;
+  34   1              Delay_xus2(10);
+  35   1              DHT11_DQ=0;     //拉低DQ
+  36   1          Delay_xms2(25);   //拉低至少18ms
+  37   1          DHT11_DQ=1;         //DQ=1 
+  38   1              Delay_xus2(30);  //主机拉高20~40us
+  39   1      }
+  40          
+  41          //等待DHT11的回应
+  42          //返回1:未检测到DHT11的存在
+  43          //返回0:存在
+  44          u8 DHT11_Check(void)       
+  45          {   
+  46   1              u8 retry=0;
+  47   1              
+  48   1              while (!DHT11_DQ&&retry<100)//判断从机发出 80us 的低电平响应信号是否结束
+  49   1              {
+  50   2                      retry++;
+  51   2                      _nop_();
+  52   2              };
+  53   1              if(retry>=100)return 1;
+  54   1              else retry=0;
+  55   1          while (DHT11_DQ&&retry<100)//判断从机发出 80us 的高电平是否结束如结束则主机进入数据接收状态
+C51 COMPILER V9.00   DHT11                                                                 05/11/2022 09:52:01 PAGE 2   
+
+  56   1              {
+  57   2                      retry++;
+  58   2                      _nop_();
+  59   2              };       
+  60   1              if(retry>=100)return 1;     
+  61   1              return 0;
+  62   1      }
+  63          
+  64          //从DHT11读取一个字节
+  65          //返回值：读到的数据
+  66          u8 DHT11_Read_Byte(void)    
+  67          {        
+  68   1          u8 i,temp;
+  69   1              u8 data_byte=0; 
+  70   1              u8 retry=0;
+  71   1      
+  72   1              for(i=0;i<8;i++)//接收8bit的数据 
+  73   1              { 
+  74   2      //              while(!DHT11_DQ);//等待50us的低电平开始信号结束
+  75   2                      while (!DHT11_DQ&&retry<50)//等待50us的低电平开始信号结束
+  76   2                      {
+  77   3                              retry++;
+  78   3                              _nop_();
+  79   3                      };
+  80   2                      retry=0; 
+  81   2                      Delay_xus2(30);//等待40us 
+  82   2                      temp=0;//时间为26us-28us表示接收的为数据'0' 
+  83   2                      if(DHT11_DQ==1) 
+  84   2                              temp=1; //如果26us-28us之后还为高电平则表示接收的数据为'1' 
+  85   2      //              while(DHT11_DQ);//等待数据信号高电平'0'为26us-28us'1'为70us
+  86   2                      while (DHT11_DQ&&retry<100)//等待数据信号高电平'0'为26us-28us'1'为70us
+  87   2                      {
+  88   3                              retry++;
+  89   3                              _nop_();
+  90   3                      };
+  91   2                      data_byte<<=1;//接收的数据为高位在前右移 
+  92   2                      data_byte|=temp; 
+  93   2              } 
+  94   1      
+  95   1              return data_byte;
+  96   1      }
+  97          
+  98          //从DHT11读取一次数据
+  99          //temp:温度值(范围:0~50°)
+ 100          //humi:湿度值(范围:20%~90%)
+ 101          //返回值：0,正常;1,读取失败
+ 102          u8 DHT11_Read_Data(u8 *temp,u8 *humi)    
+ 103          {        
+ 104   1              u8 buf[5];
+ 105   1              u8 i;
+ 106   1              DHT11_Rst();
+ 107   1              if(DHT11_Check()==0)
+ 108   1              {
+ 109   2                      for(i=0;i<5;i++)//读取40位数据
+ 110   2                      {
+ 111   3                              buf[i]=DHT11_Read_Byte();
+ 112   3                      }
+ 113   2                      if((buf[0]+buf[1]+buf[2]+buf[3])==buf[4])
+ 114   2                      {
+ 115   3                              *humi=buf[0];
+ 116   3                              *temp=buf[2];
+ 117   3                      }
+C51 COMPILER V9.00   DHT11                                                                 05/11/2022 09:52:01 PAGE 3   
+
+ 118   2                      
+ 119   2              }else return 1;
+ 120   1              return 0;           
+ 121   1      }
+ 122          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    284    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      11
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,770 @@
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\keil 4\C51\BIN\C51.EXE main.c BROWSE INCDIR(.\SRC) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          
+   2          #include <reg52.h>
+   3          #include "oled.h"
+   4          
+   5          #include <intrins.h>
+   6          #define uchar unsigned char
+   7          #define uint  unsigned int
+   8          
+   9          typedef unsigned char BYTE;
+  10          typedef unsigned int WORD;
+  11          
+  12          
+  13          
+  14          uchar dis_time_buf[16]={0};
+  15          uchar dis_time_buf2[16]={0};
+  16          uint i;
+  17          
+  18          uint flag=5;//设置初始时间  开始在“分”上
+  19          uint flag2=1;//设置闹钟时间
+  20          uchar data_byte; 
+  21          uchar RH,RL,TH,TL; 
+  22          sbit io=P0^7;  //dht11data端接单片机的P0^7口// 
+  23          sbit k1=P2^1;    //定义P31口是k1   按键选中设置
+  24          sbit k2=P2^2;    //定义P32口是k2    加键
+  25          sbit k3=P2^3;    //定义P33口是k3    减键
+  26          sbit k4=P2^4;    //定义P34口是k4    闹钟设置键
+  27          sbit LED=P2^7;       //定义2.7是个灯或者蜂鸣器，烟雾报警用
+  28          sbit LED2=P2^6;       //定义2.6是个灯或者蜂鸣器，闹钟用
+  29          sbit BEEP=P1^7;          //蜂鸣器
+  30          sbit DOUT=P2^0;  //定义单片机P2口的第1位 （即P2.0）为烟雾传感器的输入端
+  31           
+  32          
+  33          
+  34          //DS1302引脚定义
+  35          sbit RST=P1^3;
+  36          sbit IO=P1^2;
+  37          sbit SCK=P1^1;
+  38          //DS1302地址定义
+  39          #define ds1302_sec_add                  0x80            //秒数据地址
+  40          #define ds1302_min_add                  0x82            //分数据地址
+  41          #define ds1302_hr_add                   0x84            //时数据地址
+  42          #define ds1302_date_add                 0x86            //日数据地址
+  43          #define ds1302_month_add                0x88            //月数据地址
+  44          #define ds1302_day_add                  0x8a            //星期数据地址
+  45          #define ds1302_year_add                 0x8c            //年数据地址
+  46          #define ds1302_control_add              0x8e            //控制数据地址
+  47          #define ds1302_charger_add              0x90                                     
+  48          #define ds1302_clkburst_add             0xbe
+  49          //初始时间定义
+  50          uchar time_buf[8] = {0x20,0x22,0x5,0x011,0x18,0x34,0x00,0x03};//初始时间2022年5月10号20点29分30秒 星期1
+  51          uchar time_buf2[8] = {0x20,0x22,0x5,0x05,0x09,0x30,0x05,0x05};//初始闹钟2022年4月25号20点29分30秒 星期1
+  52          
+  53          void receive();
+  54          //功能:延时1毫秒
+  55          //入口参数:x
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 2   
+
+  56          //出口参数:无
+  57          //说明:当晶振为12M时，j<112；当晶振为11.0592M时，j<122
+  58          void Delay_xms(uint x)
+  59          {
+  60   1        uint i,j;
+  61   1        for(i=0;i<x;i++)
+  62   1          for(j=0;j<112;j++);
+  63   1      }
+  64          //----------------------------延时子程序---------------------------------
+  65          //功能：12us延时
+  66          //STC89C52为1T单片机,即1个时钟/机器周期,速度为AT89C52的12倍
+  67          void Delay_xus(uint t)                                  
+  68          { 
+  69   1        for(;t>0;t--)
+  70   1         {
+  71   2               _nop_();
+  72   2         }
+  73   1      }
+  74          void delay1()//一个for循环大概需要8个多机器周期一个机器周期为1us晶振为12MHz也就是说本函数延时8us多
+             -此延时函数必须德稍微精确一点 
+  75          
+  76          { 
+  77   1      
+  78   1        uchar i; 
+  79   1      
+  80   1        for(i=0;i<1;i++); 
+  81   1      
+  82   1      } 
+  83           void delay(uchar ms) //延时模块// 
+  84          
+  85          { 
+  86   1      
+  87   1        uchar i; 
+  88   1      
+  89   1        while(ms--)                 
+  90   1      
+  91   1              
+  92   1      
+  93   1       for(i=0;i<100;i++); 
+  94   1      
+  95   1      } 
+  96          
+  97          //--------------------------BCD转换----------------------
+  98          uchar BCD_Decimal(uchar bcd)//BCD码转十进制函数，输入BCD，返回十进制
+  99          {
+ 100   1              uchar Decimal;
+ 101   1              Decimal=bcd>>4;
+ 102   1              return(Decimal=Decimal*10+(bcd&=0x0F));
+ 103   1      }
+ 104          
+ 105          
+ 106          
+ 107          //----------------------------时钟DS1302模块子程序---------------------------------
+ 108          //DS1302初始化函数
+ 109          void ds1302_init(void) 
+ 110          {
+ 111   1              RST=0;                  //RST脚置低
+ 112   1              SCK=0;                  //SCK脚置低
+ 113   1      }
+ 114          //向DS1302写入一字节数据
+ 115          void ds1302_write_byte(uchar addr, uchar d) 
+ 116          {
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 3   
+
+ 117   1              uchar i;
+ 118   1              RST=1;                                  //启动DS1302总线        
+ 119   1              //写入目标地址：addr
+ 120   1              addr = addr & 0xFE;   //最低位置零，寄存器0位为0时写，为1时读
+ 121   1              for (i = 0; i < 8; i ++) {
+ 122   2                      if (addr & 0x01) {
+ 123   3                              IO=1;
+ 124   3                              }
+ 125   2                      else {
+ 126   3                              IO=0;
+ 127   3                              }
+ 128   2                      SCK=1;      //产生时钟
+ 129   2                      SCK=0;
+ 130   2                      addr = addr >> 1;
+ 131   2                      }       
+ 132   1              //写入数据：d
+ 133   1              for (i = 0; i < 8; i ++) {
+ 134   2                      if (d & 0x01) {
+ 135   3                              IO=1;
+ 136   3                              }
+ 137   2                      else {
+ 138   3                              IO=0;
+ 139   3                              }
+ 140   2                      SCK=1;    //产生时钟
+ 141   2                      SCK=0;
+ 142   2                      d = d >> 1;
+ 143   2                      }
+ 144   1              RST=0;          //停止DS1302总线
+ 145   1      }
+ 146          
+ 147          //从DS1302读出一字节数据
+ 148          uchar ds1302_read_byte(uchar addr) {
+ 149   1      
+ 150   1              uchar i,temp;   
+ 151   1              RST=1;                                  //启动DS1302总线
+ 152   1              //写入目标地址：addr
+ 153   1              addr = addr | 0x01;    //最低位置高，寄存器0位为0时写，为1时读
+ 154   1              for (i = 0; i < 8; i ++) {
+ 155   2                      if (addr & 0x01) {
+ 156   3                              IO=1;
+ 157   3                              }
+ 158   2                      else {
+ 159   3                              IO=0;
+ 160   3                              }
+ 161   2                      SCK=1;
+ 162   2                      SCK=0;
+ 163   2                      addr = addr >> 1;
+ 164   2                      }       
+ 165   1              //输出数据：temp
+ 166   1              for (i = 0; i < 8; i ++) {
+ 167   2                      temp = temp >> 1;
+ 168   2                      if (IO) {
+ 169   3                              temp |= 0x80;
+ 170   3                              }
+ 171   2                      else {
+ 172   3                              temp &= 0x7F;
+ 173   3                              }
+ 174   2                      SCK=1;
+ 175   2                      SCK=0;
+ 176   2                      }       
+ 177   1              RST=0;                                  //停止DS1302总线
+ 178   1              return temp;
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 4   
+
+ 179   1      }
+ 180          //向DS302写入时钟数据
+ 181          void ds1302_write_time(void) 
+ 182          {
+ 183   1              ds1302_write_byte(ds1302_control_add,0x00);                     //关闭写保护 
+ 184   1              ds1302_write_byte(ds1302_sec_add,0x80);                         //暂停时钟 
+ 185   1              ds1302_write_byte(ds1302_charger_add,0xa9);         //涓流充电 
+ 186   1              ds1302_write_byte(ds1302_year_add,time_buf[1]);         //年 
+ 187   1              ds1302_write_byte(ds1302_month_add,time_buf[2]);        //月 
+ 188   1              ds1302_write_byte(ds1302_date_add,time_buf[3]);         //日 
+ 189   1              ds1302_write_byte(ds1302_hr_add,time_buf[4]);           //时 
+ 190   1              ds1302_write_byte(ds1302_min_add,time_buf[5]);          //分
+ 191   1              ds1302_write_byte(ds1302_sec_add,time_buf[6]);          //秒
+ 192   1              ds1302_write_byte(ds1302_day_add,time_buf[7]);          //周 
+ 193   1              ds1302_write_byte(ds1302_control_add,0x80);                     //打开写保护     
+ 194   1      }
+ 195          //从DS302读出时钟数据
+ 196          void ds1302_read_time(void)  
+ 197          {
+ 198   1              time_buf[1]=ds1302_read_byte(ds1302_year_add);          //年 
+ 199   1              time_buf[2]=ds1302_read_byte(ds1302_month_add);         //月 
+ 200   1              time_buf[3]=ds1302_read_byte(ds1302_date_add);          //日 
+ 201   1              time_buf[4]=ds1302_read_byte(ds1302_hr_add);            //时 
+ 202   1              time_buf[5]=ds1302_read_byte(ds1302_min_add);           //分 
+ 203   1              time_buf[6]=(ds1302_read_byte(ds1302_sec_add))&0x7f;//秒，屏蔽秒的第7位，避免超出59
+ 204   1              time_buf[7]=ds1302_read_byte(ds1302_day_add);           //周    
+ 205   1      }
+ 206          
+ 207          
+ 208          //----------------------------串口  中断---------------------------------
+ 209          
+ 210          
+ 211          //定时器2初始化
+ 212          void Init_timer2(void)
+ 213          {
+ 214   1       RCAP2H=0x3c;//赋T2初始值赋为0x3cb0，溢出20次为1秒,每次溢出时间为50ms （要调整!!!）
+ 215   1       RCAP2L=0xb5;
+ 216   1       TR2=1;      //启动定时器2
+ 217   1       ET2=1;          //打开定时器2中断
+ 218   1       EA=1;           //打开总中断
+ 219   1      }
+ 220          
+ 221          
+ 222          
+ 223          //定时器中断函数
+ 224          void Timer2() interrupt 5         //定时器2是6号中断
+ 225          {
+ 226   1       static uchar t;
+ 227   1       TF2=0;
+ 228   1       t++;
+ 229   1       if(t==4)               //间隔200ms(50ms*4)读取一次时间
+ 230   1        {
+ 231   2         t=0;
+ 232   2         //ds1302_init();
+ 233   2         //Delay_xms(10);
+ 234   2         ds1302_read_time();  //读取时间 
+ 235   2         //ds1302_init();
+ 236   2         Delay_xms(10);
+ 237   2         receive();
+ 238   2         dis_time_buf[0]=(time_buf[0]>>4); //年   
+ 239   2         dis_time_buf[1]=(time_buf[0]&0x0f);
+ 240   2         
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 5   
+
+ 241   2         dis_time_buf[2]=(time_buf[1]>>4);   
+ 242   2         dis_time_buf[3]=(time_buf[1]&0x0f);
+ 243   2        
+ 244   2      
+ 245   2         
+ 246   2         
+ 247   2         dis_time_buf[4]=(time_buf[2]>>4); //月  
+ 248   2         dis_time_buf[5]=(time_buf[2]&0x0f);
+ 249   2         
+ 250   2      
+ 251   2         dis_time_buf[6]=(time_buf[3]>>4); //日   
+ 252   2         dis_time_buf[7]=(time_buf[3]&0x0f);
+ 253   2         
+ 254   2         dis_time_buf[14]=(time_buf[7]&0x07); //星期
+ 255   2         
+ 256   2         //第2行显示  
+ 257   2         dis_time_buf[8]=(time_buf[4]>>4); //时   
+ 258   2         dis_time_buf[9]=(time_buf[4]&0x0f);   
+ 259   2      
+ 260   2        
+ 261   2      
+ 262   2         dis_time_buf[10]=(time_buf[5]>>4); //分   
+ 263   2         dis_time_buf[11]=(time_buf[5]&0x0f);   
+ 264   2      
+ 265   2         dis_time_buf[12]=(time_buf[6]>>4); //秒   
+ 266   2         dis_time_buf[13]=(time_buf[6]&0x0f);
+ 267   2      
+ 268   2      
+ 269   2         //-----------------------------------------------
+ 270   2      
+ 271   2         dis_time_buf2[0]=(time_buf2[0]>>4); //年   
+ 272   2         dis_time_buf2[1]=(time_buf2[0]&0x0f);
+ 273   2         
+ 274   2         dis_time_buf2[2]=(time_buf2[1]>>4);   
+ 275   2         dis_time_buf2[3]=(time_buf2[1]&0x0f);
+ 276   2        
+ 277   2      
+ 278   2         
+ 279   2         
+ 280   2         dis_time_buf2[4]=(time_buf2[2]>>4); //月  
+ 281   2         dis_time_buf2[5]=(time_buf2[2]&0x0f);
+ 282   2         
+ 283   2      
+ 284   2         dis_time_buf2[6]=(time_buf2[3]>>4); //日   
+ 285   2         dis_time_buf2[7]=(time_buf2[3]&0x0f);
+ 286   2         
+ 287   2         dis_time_buf2[14]=(time_buf2[7]&0x07); //星期
+ 288   2         
+ 289   2         //第2行显示  
+ 290   2         dis_time_buf2[8]=(time_buf2[4]>>4); //时   
+ 291   2         dis_time_buf2[9]=(time_buf2[4]&0x0f);   
+ 292   2      
+ 293   2        
+ 294   2      
+ 295   2         dis_time_buf2[10]=(time_buf2[5]>>4); //分   
+ 296   2         dis_time_buf2[11]=(time_buf2[5]&0x0f);   
+ 297   2      
+ 298   2         dis_time_buf2[12]=(time_buf2[6]>>4); //秒   
+ 299   2         dis_time_buf2[13]=(time_buf2[6]&0x0f);
+ 300   2         
+ 301   2        }
+ 302   1      }
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 6   
+
+ 303          
+ 304          //----------------------------0.96OLED/LCD显示功能程序---------------------------------
+ 305          
+ 306          
+ 307          void Displaytime(void)
+ 308          {
+ 309   1         
+ 310   1         OLED_ShowNum(0,0,dis_time_buf[0],1,16);
+ 311   1          OLED_ShowNum(8,0,dis_time_buf[1],1,16);
+ 312   1               OLED_ShowNum(16,0,dis_time_buf[2],1,16);
+ 313   1                OLED_ShowNum(24,0,dis_time_buf[3],1,16);
+ 314   1              OLED_ShowChar(32,0,'/');
+ 315   1                 OLED_ShowNum(40,0,dis_time_buf[4],1,16);
+ 316   1                  OLED_ShowNum(48,0,dis_time_buf[5],1,16);
+ 317   1              OLED_ShowChar(56,0,'/');
+ 318   1                       OLED_ShowNum(64,0,dis_time_buf[6],1,16);
+ 319   1                        OLED_ShowNum(72,0,dis_time_buf[7],1,16);
+ 320   1              OLED_ShowCHinese(90,0,5);
+ 321   1                         OLED_ShowNum(106,0,dis_time_buf[14],1,16);
+ 322   1                                        //第二行
+ 323   1                              
+ 324   1                              OLED_ShowCHinese(13,2,3);
+ 325   1                              OLED_ShowCHinese(31,2,4);         
+ 326   1                          OLED_ShowNum(0+47,2,dis_time_buf[8],1,16);
+ 327   1          OLED_ShowNum(8+47,2,dis_time_buf[9],1,16);
+ 328   1              OLED_ShowChar(16+47,2,':');
+ 329   1               OLED_ShowNum(24+47,2,dis_time_buf[10],1,16);
+ 330   1                OLED_ShowNum(32+47,2,dis_time_buf[11],1,16);
+ 331   1              OLED_ShowChar(40+47,2,':');
+ 332   1                 OLED_ShowNum(48+47,2,dis_time_buf[12],1,16);
+ 333   1                  OLED_ShowNum(56+47,2,dis_time_buf[13],1,16);
+ 334   1      }
+ 335          
+ 336          void Displaytime2(void)
+ 337          {
+ 338   1         
+ 339   1         OLED_ShowNum(0,0,dis_time_buf2[0],1,16);
+ 340   1          OLED_ShowNum(8,0,dis_time_buf2[1],1,16);
+ 341   1               OLED_ShowNum(16,0,dis_time_buf2[2],1,16);
+ 342   1                OLED_ShowNum(24,0,dis_time_buf2[3],1,16);
+ 343   1              OLED_ShowChar(32,0,'/');
+ 344   1                 OLED_ShowNum(40,0,dis_time_buf2[4],1,16);
+ 345   1                  OLED_ShowNum(48,0,dis_time_buf2[5],1,16);
+ 346   1              OLED_ShowChar(56,0,'/');
+ 347   1                       OLED_ShowNum(64,0,dis_time_buf2[6],1,16);
+ 348   1                        OLED_ShowNum(72,0,dis_time_buf2[7],1,16);
+ 349   1              OLED_ShowCHinese(90,0,5);
+ 350   1                         OLED_ShowNum(106,0,dis_time_buf2[14],1,16);
+ 351   1                                        //第二行
+ 352   1                              
+ 353   1                              OLED_ShowCHinese(3,2,6);         //闹
+ 354   1                              OLED_ShowCHinese(21,2,7);        //钟 
+ 355   1                          OLED_ShowNum(0+47,2,dis_time_buf2[8],1,16);
+ 356   1          OLED_ShowNum(8+47,2,dis_time_buf2[9],1,16);
+ 357   1              OLED_ShowChar(16+47,2,':');
+ 358   1               OLED_ShowNum(24+47,2,dis_time_buf2[10],1,16);
+ 359   1                OLED_ShowNum(32+47,2,dis_time_buf2[11],1,16);
+ 360   1              OLED_ShowChar(40+47,2,':');
+ 361   1                 OLED_ShowNum(48+47,2,dis_time_buf2[12],1,16);
+ 362   1                  OLED_ShowNum(56+47,2,dis_time_buf2[13],1,16);
+ 363   1      }
+ 364          
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 7   
+
+ 365          
+ 366          
+ 367          
+ 368          
+ 369          
+ 370          
+ 371          
+ 372          
+ 373          void displayRT(void)
+ 374          {
+ 375   1         OLED_ShowCHinese(0,4,2);
+ 376   1         OLED_ShowCHinese(16,4,1);
+ 377   1         OLED_ShowChar(32,4,':');
+ 378   1         OLED_ShowNum(40,4,RH/10,1,16);
+ 379   1         OLED_ShowNum(48,4,RH%10,1,16);
+ 380   1         OLED_ShowCHinese(0,6,0);
+ 381   1         OLED_ShowCHinese(16,6,1);
+ 382   1         OLED_ShowChar(32,6,':');
+ 383   1         OLED_ShowNum(40,6,TH/10,1,16);
+ 384   1         OLED_ShowNum(48,6,TH%10,1,16);
+ 385   1      }
+ 386          //----------------------------DHT11模块功能子程序---------------------------------
+ 387          uchar receive_byte()//接收一个字节// 
+ 388          
+ 389          { 
+ 390   1      
+ 391   1        uchar i,temp2; 
+ 392   1      
+ 393   1        for(i=0;i<8;i++)//接收8bit的数据 
+ 394   1      
+ 395   1        { 
+ 396   2      
+ 397   2              while(!io);//等待50us的低电平开始信号结束 
+ 398   2      
+ 399   2              delay1();//开始信号结束之后延时26us-28us以下三个延时函数 
+ 400   2      
+ 401   2               delay1(); 
+ 402   2      
+ 403   2              delay1(); 
+ 404   2      
+ 405   2              temp2=0;//时间为26us-28us表示接收的为数据'0' 
+ 406   2      
+ 407   2              if(io==1) 
+ 408   2      
+ 409   2               temp2=1; //如果26us-28us之后还为高电平则表示接收的数据为'1' 
+ 410   2      
+ 411   2          while(io);//等待数据信号高电平'0'为26us-28us'1'为70us 
+ 412   2      
+ 413   2              data_byte<<=1;//接收的数据为高位在前右移 
+ 414   2      
+ 415   2               data_byte|=temp2; 
+ 416   2      
+ 417   2        } 
+ 418   1      
+ 419   1        return data_byte; 
+ 420   1      
+ 421   1      } 
+ 422          void start()//开始信号 
+ 423          
+ 424          { 
+ 425   1      
+ 426   1        io=1; 
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 8   
+
+ 427   1      
+ 428   1        delay1(); 
+ 429   1      
+ 430   1        io=0; 
+ 431   1      
+ 432   1        delay(25);// 主机把总线拉低必须大于18ms保证DHT11能检测到起始信号 
+ 433   1      
+ 434   1        io=1;    //发送开始信号结束后拉高电平延时20-40us 
+ 435   1      
+ 436   1        delay1();//以下三个延时函数差不多为24us符合要求 
+ 437   1      
+ 438   1        delay1(); 
+ 439   1      
+ 440   1        delay1();
+ 441   1      
+ 442   1        delay1(); 
+ 443   1      
+ 444   1      } 
+ 445          void receive()//接收数据// 
+ 446          
+ 447          { 
+ 448   1      
+ 449   1        uchar T_H,T_L,R_H,R_L,check,num_check,i; 
+ 450   1      
+ 451   1        start();//开始信号// 
+ 452   1      
+ 453   1        io=1;   //主机设为输入判断从机DHT11响应信号 
+ 454   1      
+ 455   1        if(!io)//判断从机是否有低电平响应信号// 
+ 456   1      
+ 457   1        {  
+ 458   2              while(!io);//判断从机发出 80us 的低电平响应信号是否结束// 
+ 459   2              //Delay_xus(20);
+ 460   2      
+ 461   2              while(io);//判断从机发出 80us 的高电平是否结束如结束则主机进入数据接收状态 
+ 462   2      
+ 463   2              R_H=receive_byte();//湿度高位 
+ 464   2      
+ 465   2              R_L=receive_byte();//湿度低位 
+ 466   2      
+ 467   2              T_H=receive_byte();//温度高位 
+ 468   2      
+ 469   2              T_L=receive_byte();//温度低位 
+ 470   2      
+ 471   2              check=receive_byte();//校验位 
+ 472   2      
+ 473   2              io=0; //当最后一bit数据接完毕后从机拉低电平50us// 
+ 474   2      
+ 475   2              for(i=0;i<7;i++)//差不多50us的延时 
+ 476   2      
+ 477   2              delay1(); 
+ 478   2      
+ 479   2              io=1;//总线由上拉电阻拉高进入空闲状态 
+ 480   2      
+ 481   2              num_check=R_H+R_L+T_H+T_L; 
+ 482   2      
+ 483   2              if(num_check==check)//判断读到的四个数据之和是否与校验位相同 
+ 484   2      
+ 485   2              { 
+ 486   3      
+ 487   3         RH=R_H; 
+ 488   3      
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 9   
+
+ 489   3         RL=R_L; 
+ 490   3      
+ 491   3         TH=T_H; 
+ 492   3      
+ 493   3         TL=T_L; 
+ 494   3      
+ 495   3         check=num_check; 
+ 496   3      
+ 497   3              } 
+ 498   2      
+ 499   2        } 
+ 500   1      
+ 501   1      } 
+ 502          
+ 503          
+ 504          
+ 505          //-------------------------------键盘----------------------
+ 506          void keypros1()
+ 507          {
+ 508   1              if(k1==0)                 //检测按键K1是否按下
+ 509   1              {       
+ 510   2                      Delay_xms(10);   //消除抖动 一般大约10ms
+ 511   2                      if(k1==0)        //再次判断按键是否按下
+ 512   2                      {
+ 513   3                              flag+=1;
+ 514   3                              if(flag==8) {flag=1;}
+ 515   3                      }
+ 516   2                      while(!k1);      //检测按键是否松开
+ 517   2              }               
+ 518   1      }
+ 519          
+ 520          void keypros4()
+ 521          {
+ 522   1              if(k4==0)                 //检测按键K1是否按下
+ 523   1              {       
+ 524   2                      Delay_xms(10);   //消除抖动 一般大约10ms
+ 525   2                      if(k4==0)        //再次判断按键是否按下
+ 526   2                      {
+ 527   3                              flag2=-flag2;
+ 528   3                              
+ 529   3                      }
+ 530   2                      while(!k4);      //检测按键是否松开
+ 531   2              }               
+ 532   1      }
+ 533          
+ 534          
+ 535          
+ 536          
+ 537          
+ 538          void keypros2()
+ 539          {
+ 540   1              
+ 541   1      
+ 542   1              if(k2==0)                 //检测按键K1是否按下
+ 543   1              {       
+ 544   2                      Delay_xms(10);   //消除抖动 一般大约10ms
+ 545   2                      if(k2==0)        //再次判断按键是否按下
+ 546   2                      {
+ 547   3                       if(flag2==1)
+ 548   3                       {
+ 549   4                        ds1302_read_time();
+ 550   4                        time_buf[flag]+=0x01;
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 10  
+
+ 551   4                        ds1302_init();
+ 552   4                        Delay_xms(10);                                                                                                                         
+ 553   4                        ds1302_write_time();
+ 554   4                        }
+ 555   3                        else{time_buf2[flag]+=0x01;}
+ 556   3                      /*
+ 557   3                       ds1302_read_time();
+ 558   3                       ds1302_write_byte(ds1302_control_add,0x00);                    //关闭写保护 
+ 559   3                       ds1302_write_byte(ds1302_sec_add,0x80);                                //暂停时钟 
+ 560   3                       ds1302_write_byte(ds1302_charger_add,0xa9);        //涓流充电 
+ 561   3                       ds1302_write_byte(ds1302_year_add,time_buf[flag]+1);           //对应flag位单位
+ 562   3                       ds1302_write_byte(ds1302_control_add,0x80);                    //打开写保护 
+ 563   3                       */
+ 564   3      
+ 565   3                      }
+ 566   2                      while(!k2);      //检测按键是否松开
+ 567   2              }               
+ 568   1      }
+ 569          void keypros3()
+ 570          {
+ 571   1              
+ 572   1      
+ 573   1              if(k3==0)                 //检测按键K3是否按下
+ 574   1              {       
+ 575   2                      Delay_xms(10);   //消除抖动 一般大约10ms
+ 576   2                      if(k3==0)        //再次判断按键是否按下
+ 577   2                      {
+ 578   3                      if(flag2==1)  
+ 579   3                      {
+ 580   4                        ds1302_read_time();
+ 581   4                        time_buf[flag]-=0x01;
+ 582   4                        ds1302_init();
+ 583   4                        Delay_xms(10);                                                                                                                         
+ 584   4                        ds1302_write_time();
+ 585   4                       }
+ 586   3                       else 
+ 587   3                       {      time_buf2[flag]-=0x01;}
+ 588   3                       
+ 589   3                      /*
+ 590   3                       ds1302_read_time();
+ 591   3                       ds1302_write_byte(ds1302_control_add,0x00);                    //关闭写保护 
+ 592   3                       ds1302_write_byte(ds1302_sec_add,0x80);                                //暂停时钟 
+ 593   3                       ds1302_write_byte(ds1302_charger_add,0xa9);        //涓流充电 
+ 594   3                       ds1302_write_byte(ds1302_year_add,time_buf[flag]+1);           //对应flag位单位
+ 595   3                       ds1302_write_byte(ds1302_control_add,0x80);                    //打开写保护 
+ 596   3                       */
+ 597   3      
+ 598   3                      }
+ 599   2                      while(!k3);      //检测按键是否松开
+ 600   2              }               
+ 601   1      }
+ 602          
+ 603          
+ 604          
+ 605          //----------------------------主程序---------------------------------
+ 606          //主函数
+ 607          void main(void)
+ 608          {  
+ 609   1               //u8 temp=0,humi=0;
+ 610   1               //u8 temp_buf[3],humi_buf[3];
+ 611   1                BEEP=0;
+ 612   1      
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 11  
+
+ 613   1      
+ 614   1      //-----------------------初始化-----------------------------
+ 615   1      
+ 616   1       //DHT11_Init();
+ 617   1       Delay_xms(50);//等待系统稳定
+ 618   1       ds1302_init();  //DS1302初始化
+ 619   1       Delay_xms(10);
+ 620   1       ds1302_write_time(); //写入初始值
+ 621   1       Init_timer2(); //定时器2初始化 
+ 622   1              OLED_Init();
+ 623   1              OLED_Clear;
+*** WARNING C275 IN LINE 623 OF MAIN.C: expression with possibly no effect
+ 624   1      
+ 625   1       while(1)
+ 626   1        {
+ 627   2      
+ 628   2      
+ 629   2      //-----------------------时间设置-----------------------------
+ 630   2        LED=1;
+ 631   2        LED2=1;
+ 632   2        keypros1();
+ 633   2        keypros2();
+ 634   2        keypros3();
+ 635   2        keypros4();
+ 636   2      
+ 637   2      
+ 638   2      
+ 639   2      
+ 640   2      //-----------------------时间显示-----------------------------
+ 641   2        //Delay_xms(20);
+ 642   2        Displaytime();
+ 643   2        //Delay_xms(20);
+ 644   2               //s+=0.001 ;
+ 645   2        //Delay_xms(200000);
+ 646   2        
+ 647   2                 OLED_ShowChar(70,4,'f');
+ 648   2                 OLED_ShowChar(78,4,'l');
+ 649   2                 OLED_ShowChar(86,4,'a');
+ 650   2                 OLED_ShowChar(94,4,'g');
+ 651   2             OLED_ShowNum(78,6,flag,1,16);
+ 652   2                 //OLED_ShowNum(80,6,BCD_Decimal(time_buf[6]),2,16);
+ 653   2      
+ 654   2      //-----------------------闹钟设定-----------------------------
+ 655   2                 if(flag2!=1)
+ 656   2                 {
+ 657   3                  OLED_Clear();
+ 658   3                      Delay_xms(1000);
+ 659   3                                      
+ 660   3                      while(1)
+ 661   3                      {
+ 662   4                      OLED_ShowChar(70,4,'f');
+ 663   4                 OLED_ShowChar(78,4,'l');
+ 664   4                 OLED_ShowChar(86,4,'a');
+ 665   4                 OLED_ShowChar(94,4,'g');
+ 666   4             OLED_ShowNum(78,6,flag,1,16);
+ 667   4                 //OLED_ShowNum(80,6,BCD_Decimal(time_buf[6]),2,16);
+ 668   4                 Displaytime2();
+ 669   4                      keypros1();
+ 670   4                      keypros2();
+ 671   4                      keypros3();
+ 672   4                       keypros4();
+ 673   4                       if(flag2==1){break;}
+C51 COMPILER V9.00   MAIN                                                                  05/11/2022 18:33:37 PAGE 12  
+
+ 674   4                      }
+ 675   3                      OLED_Clear();
+ 676   3                 }
+ 677   2      
+ 678   2      
+ 679   2      //-----------------------------------------------闹钟声音----
+ 680   2                 if(time_buf[4]==time_buf2[4]&&time_buf[5]==time_buf2[5]&&time_buf[6]==time_buf2[6]) 
+ 681   2                 {
+ 682   3                   //声音   到时间
+ 683   3                       BEEP=0;
+ 684   3                       LED2=0;
+ 685   3                       i=80;
+ 686   3                       //Delay_xms(5000);
+ 687   3                        while(i) 
+ 688   3                                {
+ 689   4                                      i--;
+ 690   4                                      Displaytime();    //亮灯的时候 保证时间继续在走
+ 691   4                                }
+ 692   3                       BEEP=1;
+ 693   3                       LED2=1;
+ 694   3                 }
+ 695   2      
+ 696   2      //----------------------------------- 温湿度--------------------------
+ 697   2               
+ 698   2                // i2++;
+ 699   2                //if(i2%30==0)
+ 700   2                //{
+ 701   2                       //DHT11_Read_Data(&temp,&humi);
+ 702   2                       //receive();//接收温湿度数据    移到中断里读取温湿度，不然程序莫名卡死
+ 703   2                //}
+ 704   2                //Delay_xms(1);
+ 705   2                displayRT();
+ 706   2              
+ 707   2       
+ 708   2      //-----------------------烟雾------------------------------- 
+ 709   2        
+ 710   2         if(DOUT==0)//当浓度高于设定值时 ，执行条件函数
+ 711   2               {
+ 712   3              Delay_xms(500);//延时抗干扰
+ 713   3                      if(DOUT==0)//确定 浓度高于设定值时 ，执行条件函数
+ 714   3                  {
+ 715   4                       LED=0;    //点亮P1.0口灯(或其他的烟雾报警)
+ 716   4                      }         
+ 717   3               }
+ 718   2      
+ 719   2      //-----------------------------------------------------------
+ 720   2      
+ 721   2      
+ 722   2        }
+ 723   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1978    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     60    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

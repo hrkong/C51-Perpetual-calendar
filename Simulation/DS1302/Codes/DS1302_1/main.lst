@@ -1,0 +1,194 @@
+C51 COMPILER V9.00   MAIN                                                                  04/23/2022 21:59:24 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\main.obj
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE ..\..\..\..\51 DHT\main.c BROWSE DEBUG OBJECTEXTEND PRINT(.\main.lst) OBJECT
+                    -(.\main.obj)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include "LCD12864.h"
+   3          #include "ds1302.h"
+   4          #include "dhtXX.h"
+   5          
+   6          struct SYS_PARAM{
+   7                  uchar set_no;
+   8                  uchar year;
+   9                  uchar month;
+  10                  uchar date;
+  11                  uchar week;
+  12                  uchar hour;
+  13                  uchar min;
+  14                  uchar sec;
+  15                  uint  temp;
+  16                  uint  humi;
+  17          }SYSTEM = {0,17,3,3,5,20,57,0,150,740};
+  18          
+  19          sbit KEY0 = P3^2;
+  20          sbit KEY1 = P3^3;
+  21          
+  22          
+  23          uchar wk[7][2] = {{"日"},{"一"},{"二"},{"三"},{"四"},{"五"},{"六"}};
+  24          
+  25          uchar dis1[16] = {"20  /  /        "};                  // 显示年月日星期
+  26          uchar dis2[16] = {"      :  :      "};                  // 显示时分秒
+  27          uchar dis3[16] = {"温度:  . C      "};                  // 显示温度
+  28          uchar dis4[16] = {"湿度:  . %      "};                  // 显示湿度
+  29          
+  30          /*******************************************************************************
+  31          * 函 数 名       : void GetTime(void)
+  32          * 函数功能               : 获取时间数据
+  33          * 输    入       : 无
+  34          * 输    出       : 无
+  35          *******************************************************************************/
+  36          void GetTime(void)
+  37          {
+  38   1              unsigned char year=0X17,month=0X02,date=0X26,week=0,hour=0X21,min=0X49,sec=0X30;
+  39   1              year = ReadCommand(YEAR_READ);
+  40   1              month = ReadCommand(MONT_READ);
+  41   1              date = ReadCommand(DATE_READ);
+  42   1              week = ReadCommand(WEEK_READ);
+  43   1              hour = ReadCommand(HOUR_READ);
+  44   1              min = ReadCommand(MINU_READ);
+  45   1              sec = ReadCommand(SECO_READ);
+  46   1              SYSTEM.year = (year>>4)*10+(year&0x0f);
+  47   1              SYSTEM.month = (month>>4)*10+(month&0x0f);
+  48   1              SYSTEM.date = (date>>4)*10+(date&0x0f);
+  49   1              SYSTEM.week = week;
+  50   1              SYSTEM.hour = (hour>>4)*10+(hour&0x0f);
+  51   1              SYSTEM.min = (min>>4)*10+(min&0x0f);
+  52   1              SYSTEM.sec = (sec>>4)*10+(sec&0x0f);
+  53   1      }
+  54          /*******************************************************************************
+C51 COMPILER V9.00   MAIN                                                                  04/23/2022 21:59:24 PAGE 2   
+
+  55          * 函 数 名       : void SetTime(void)
+  56          * 函数功能               : 设置时间数据
+  57          * 输    入       : 无
+  58          * 输    出       : 无
+  59          *******************************************************************************/
+  60          void SetTime(void)
+  61          {
+  62   1              unsigned char year,month,date,week,hour,min;
+  63   1              year = ((SYSTEM.year/10)<<4)+(SYSTEM.year%10);
+  64   1              month = ((SYSTEM.month/10)<<4)+(SYSTEM.month%10);
+  65   1              date = ((SYSTEM.date/10)<<4)+(SYSTEM.date%10);
+  66   1              week = SYSTEM.week;
+  67   1              hour = ((SYSTEM.hour/10)<<4)+(SYSTEM.hour%10);
+  68   1              min = ((SYSTEM.min/10)<<4)+(SYSTEM.min%10);
+  69   1              WriteCommand(YEAR_WRITE,year);
+  70   1              WriteCommand(MONT_WRITE,month);
+  71   1              WriteCommand(DATE_WRITE,date);
+  72   1              WriteCommand(WEEK_WRITE,week);
+  73   1              WriteCommand(HOUR_WRITE,hour);
+  74   1              WriteCommand(MINU_WRITE,min);
+  75   1      }
+  76          /*******************************************************************************
+  77          * 函 数 名       : void KEY_Init(void)
+  78          * 函数功能               : 按键初始化
+  79          * 输    入       : 无
+  80          * 输    出       : 无
+  81          *******************************************************************************/
+  82          void KEY_Init(void)
+  83          {
+  84   1              IT0 = 1;
+  85   1              IT1 = 1;
+  86   1              EX0 = 1;
+  87   1              EX1 = 1;
+  88   1              EA = 1;
+  89   1      }
+  90          
+  91          void main(void)
+  92          {
+  93   1              lcd_init();
+  94   1              DS1302_Init();
+  95   1              
+  96   1              KEY_Init();
+  97   1              DAT = 1;
+  98   1              SetTime();
+  99   1              while(1)
+ 100   1              {
+ 101   2                      if(SYSTEM.set_no==0)
+ 102   2                              GetTime();
+ 103   2      
+ 104   2      //              ReadData();
+ 105   2      //              SYSTEM.temp = temp;
+ 106   2      //              SYSTEM.humi = humi;
+ 107   2      
+ 108   2                      dis1[2] = SYSTEM.year/10+'0';
+ 109   2                      dis1[3] = SYSTEM.year%10+'0';
+ 110   2                      dis1[5] = SYSTEM.month/10+'0';
+ 111   2                      dis1[6] = SYSTEM.month%10+'0';
+ 112   2                      dis1[8] = SYSTEM.date/10+'0';
+ 113   2                      dis1[9] = SYSTEM.date%10+'0';
+ 114   2                      
+ 115   2                      dis2[4] = SYSTEM.hour/10+'0';
+ 116   2                      dis2[5] = SYSTEM.hour%10+'0';
+C51 COMPILER V9.00   MAIN                                                                  04/23/2022 21:59:24 PAGE 3   
+
+ 117   2                      dis2[7] = SYSTEM.min/10+'0';
+ 118   2                      dis2[8] = SYSTEM.min%10+'0';
+ 119   2                      dis2[10] = SYSTEM.sec/10+'0';
+ 120   2                      dis2[11] = SYSTEM.sec%10+'0';
+ 121   2                      
+ 122   2                      dis3[5] = SYSTEM.temp/100+'0';
+ 123   2                      dis3[6] = SYSTEM.temp%100/10+'0';
+ 124   2                      dis3[8] = SYSTEM.temp%10+'0';
+ 125   2      
+ 126   2                      dis4[5] = SYSTEM.humi/100+'0';
+ 127   2                      dis4[6] = SYSTEM.humi%100/10+'0';
+ 128   2                      dis4[8] = SYSTEM.humi%10+'0';
+ 129   2      
+ 130   2                      lcd12864_printf(1,0,10,dis1);
+ 131   2                      lcd12864_printf(2,0,16,dis2);
+ 132   2                      lcd12864_printf(1,6,2,wk[SYSTEM.week]);
+ 133   2                      lcd12864_printf(3,0,16,dis3);
+ 134   2                      lcd12864_printf(4,0,16,dis4);   
+ 135   2              }
+ 136   1      }
+ 137          
+ 138          void EXT0_Int(void) interrupt 0
+ 139          {
+ 140   1              Delay10ms();
+ 141   1              if(KEY0==0)
+ 142   1              {
+ 143   2                      if(++SYSTEM.set_no>6)
+ 144   2                      {
+ 145   3                              SetTime();
+ 146   3                              SYSTEM.set_no = 0;
+ 147   3                      }
+ 148   2              }
+ 149   1      }
+ 150          void EXT1_Int(void) interrupt 2
+ 151          {
+ 152   1              Delay10ms();
+ 153   1              if(KEY1==0)
+ 154   1              {
+ 155   2                      switch (SYSTEM.set_no)
+ 156   2                      {
+ 157   3                              case 1 : if(++SYSTEM.year>99)SYSTEM.year = 0;break;
+ 158   3                              case 2 : if(++SYSTEM.month>12)SYSTEM.month = 1;break;
+ 159   3                              case 3 : if(++SYSTEM.date>31)SYSTEM.date = 1;break;
+ 160   3                              case 4 : if(++SYSTEM.week>6)SYSTEM.week = 0;break;
+ 161   3                              case 5 : if(++SYSTEM.hour>23)SYSTEM.year = 0;break;
+ 162   3                              case 6 : if(++SYSTEM.min>59)SYSTEM.year = 0;break;
+ 163   3                              default: SYSTEM.set_no = 0;break;
+ 164   3                      }
+ 165   2              }
+ 166   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    944    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     90      11
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,396 @@
+C51 COMPILER V9.00   LESSON1                                                               04/23/2022 12:17:15 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE LESSON1
+OBJECT MODULE PLACED IN Lesson1.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE Lesson1.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          //51单片机控制温湿度传感器DHT11然后在LCD1602上显示当前的温湿度及单位其中湿度在第一行显示温度在第二行
+             -显示。单片机为YL-9最小系统。
+   2          
+   3          # include <reg51.h>
+   4          # include <intrins.h>
+   5          # include <stdio.h>
+   6          typedef unsigned char BYTE;
+   7          typedef unsigned int WORD;
+   8          #define uint unsigned int 
+   9          #define uchar unsigned char 
+  10          sbit io=P1^0;//dht11data端接单片机的P1^0口// 
+  11          
+  12          sbit rs=P2^5;           //以下三行是设置lcd1602的使能端//
+  13          sbit rw=P2^6;
+  14          sbit ep=P2^7; 
+  15          
+  16          typedef bit BOOL;//此声明一个布尔型变量即真或假// 
+  17          
+  18          uchar data_byte; 
+  19          
+  20          uchar RH,RL,TH,TL; 
+  21          
+  22           
+  23          
+  24          //***************延时函数************************************* 
+  25          
+  26           void delay(uchar ms) //延时模块// 
+  27          
+  28          { 
+  29   1      
+  30   1        uchar i; 
+  31   1      
+  32   1        while(ms--)                 
+  33   1        for(i=0;i<100;i++); 
+  34   1      
+  35   1      } 
+  36          
+  37          
+  38          void delay1()//一个for循环大概需要8个多机器周期一个机器周期为1us晶振为12MHz也就是说本函数延时8us多
+             -此延时函数必须德稍微精确一点 
+  39          
+  40          { 
+  41   1      
+  42   1        uchar i; 
+  43   1      
+  44   1        for(i=0;i<1;i++); 
+  45   1      
+  46   1      } 
+  47          void delay2()//27个机器周期，12M晶振，函数延时为27us 
+  48          
+  49          { 
+  50   1              _nop_();
+  51   1              _nop_();
+  52   1              _nop_();
+  53   1              _nop_();
+C51 COMPILER V9.00   LESSON1                                                               04/23/2022 12:17:15 PAGE 2   
+
+  54   1              _nop_();
+  55   1              _nop_();
+  56   1              _nop_();
+  57   1              _nop_();
+  58   1              _nop_();
+  59   1              _nop_();
+  60   1              _nop_();
+  61   1              _nop_();
+  62   1              _nop_();
+  63   1              _nop_();
+  64   1              _nop_();
+  65   1              _nop_();
+  66   1              _nop_();
+  67   1              _nop_();
+  68   1              _nop_();
+  69   1              _nop_();
+  70   1              _nop_();
+  71   1              _nop_();
+  72   1              _nop_();
+  73   1              _nop_();
+  74   1              _nop_();
+  75   1              _nop_();
+  76   1              _nop_();
+  77   1      } 
+  78            
+  79          
+  80          //***************************************************************  
+  81          
+  82          //lcd模块// 
+  83          
+  84          BOOL lcd_bz()//测试lcd忙碌状态返回值为布尔型数值真或假'1'.'0'  
+  85          
+  86          { 
+  87   1      
+  88   1       BOOL result;
+  89   1        rs=0;           // 读忙信号
+  90   1        rw=1;
+  91   1        ep=1;
+  92   1        _nop_();
+  93   1        _nop_();
+  94   1        _nop_();
+  95   1        _nop_();
+  96   1        result = (BOOL)(P0&0x80);
+  97   1        ep=0;
+  98   1        return result ;
+  99   1      }     
+ 100          
+ 101          void write_cmd(uchar cmd)//写指令// 
+ 102          
+ 103          { 
+ 104   1      
+ 105   1        while (lcd_bz());
+ 106   1        rs=0;
+ 107   1        rw=0;
+ 108   1        ep=0;
+ 109   1        _nop_();
+ 110   1        _nop_();
+ 111   1        P0=cmd ;
+ 112   1        _nop_();
+ 113   1        _nop_();
+ 114   1        _nop_();
+ 115   1        _nop_();
+C51 COMPILER V9.00   LESSON1                                                               04/23/2022 12:17:15 PAGE 3   
+
+ 116   1        ep=1;
+ 117   1        _nop_();
+ 118   1        _nop_();
+ 119   1        _nop_();
+ 120   1        _nop_();
+ 121   1        ep=0;
+ 122   1      
+ 123   1      } 
+ 124          
+ 125           
+ 126          
+ 127          void write_addr(uchar addr)//写地址// 
+ 128          
+ 129          { 
+ 130   1      
+ 131   1        write_cmd(addr|0x80);//LCD第一行的首地址为0x80第二行的首地址为0x80+0x40=0xc0 
+ 132   1      
+ 133   1      } 
+ 134          
+ 135           
+ 136          
+ 137          void write_byte(uchar dat) //写字节// 
+ 138          
+ 139          { 
+ 140   1      
+ 141   1         while (lcd_bz());
+ 142   1        rs=1;
+ 143   1        rw=0;
+ 144   1        ep=0;
+ 145   1        _nop_();
+ 146   1        _nop_();
+ 147   1        P0=dat ;
+ 148   1        _nop_();
+ 149   1        _nop_();
+ 150   1        _nop_();
+ 151   1        _nop_();
+ 152   1        ep=1;
+ 153   1        _nop_();
+ 154   1        _nop_();
+ 155   1        _nop_();
+ 156   1        _nop_();
+ 157   1        ep=0;
+ 158   1      
+ 159   1      } 
+ 160          
+ 161           
+ 162          
+ 163          void lcd_init() //lcd初始化// 
+ 164          
+ 165          { 
+ 166   1      
+ 167   1        write_cmd(0x38);//设置LCD两行显示一个数据由5*7点阵表示,数据由8跟线传输 
+ 168   1      
+ 169   1        delay(1); 
+ 170   1      
+ 171   1        write_cmd(0x0c);//清除屏幕显示 
+ 172   1      
+ 173   1        delay(1); 
+ 174   1      
+ 175   1        write_cmd(0x06);//设定输入方式增量不移位 
+ 176   1      
+ 177   1        delay(1); 
+C51 COMPILER V9.00   LESSON1                                                               04/23/2022 12:17:15 PAGE 4   
+
+ 178   1      
+ 179   1        write_cmd(0x01);//开整体显示关光标不闪烁 
+ 180   1      
+ 181   1        delay(1); 
+ 182   1      
+ 183   1      } 
+ 184          
+ 185           
+ 186          
+ 187          void display(uchar addr,uchar q)//在某一地址上显示内容adder表示的是地址偏移量q表示显示的字符或数字// 
+ 188          
+ 189          { 
+ 190   1      
+ 191   1        delay(10);   write_addr(addr); 
+ 192   1      
+ 193   1        write_byte(q); 
+ 194   1      
+ 195   1        delay(1);//修改此时间可以改变LCD上数值跳变的数度 
+ 196   1      
+ 197   1      } 
+ 198          
+ 199           
+ 200          
+ 201          //**************************dht11测试某块*************************************// 
+ 202          
+ 203          void start()//开始信号 
+ 204          
+ 205          { 
+ 206   1      
+ 207   1        io=1; 
+ 208   1      
+ 209   1        delay1(); 
+ 210   1      
+ 211   1        io=0; 
+ 212   1      
+ 213   1        delay(25);// 主机把总线拉低必须大于18ms保证DHT11能检测到起始信号 
+ 214   1      
+ 215   1        io=1;    //发送开始信号结束后拉高电平延时20-40us 
+ 216   1      
+ 217   1        delay2();//以下三个延时函数差不多为24us符合要求 
+ 218   1      } 
+ 219          
+ 220           
+ 221          
+ 222          uchar receive_byte()//接收一个字节// 
+ 223          
+ 224          { 
+ 225   1      
+ 226   1        uchar i,temp; 
+ 227   1      
+ 228   1        for(i=0;i<8;i++)//接收8bit的数据 
+ 229   1      
+ 230   1        { 
+ 231   2      
+ 232   2              while(!io);//等待50us的低电平开始信号结束 
+ 233   2      
+ 234   2              delay2();//开始信号结束之后延时26us-28us以下三个延时函数  
+ 235   2      
+ 236   2              temp=0;//时间为26us-28us表示接收的为数据'0' 
+ 237   2      
+ 238   2              if(io==1) 
+ 239   2      
+C51 COMPILER V9.00   LESSON1                                                               04/23/2022 12:17:15 PAGE 5   
+
+ 240   2               temp=1; //如果26us-28us之后还为高电平则表示接收的数据为'1' 
+ 241   2      
+ 242   2          while(io);//等待数据信号高电平'0'为26us-28us'1'为70us 
+ 243   2      
+ 244   2              data_byte<<=1;//接收的数据为高位在前右移 
+ 245   2      
+ 246   2               data_byte|=temp; 
+ 247   2      
+ 248   2        } 
+ 249   1      
+ 250   1        return data_byte; 
+ 251   1      
+ 252   1      } 
+ 253          
+ 254              
+ 255          
+ 256          void receive()//接收数据 
+ 257          
+ 258          { 
+ 259   1      
+ 260   1        uchar T_H,T_L,R_H,R_L,check,num_check,i; 
+ 261   1      
+ 262   1        start();//开始信号// 
+ 263   1      
+ 264   1        io=1;   //主机设为输入判断从机DHT11响应信号 
+ 265   1      
+ 266   1        if(!io)//判断从机是否有低电平响应信号// 
+ 267   1      
+ 268   1        {  
+ 269   2              while(!io);//判断从机发出 80us 的低电平响应信号是否结束 
+ 270   2      
+ 271   2              while(io);//判断从机发出 80us 的高电平是否结束如结束则主机进入数据接收状态 
+ 272   2      
+ 273   2              R_H=receive_byte();//湿度高位 
+ 274   2      
+ 275   2              R_L=receive_byte();//湿度低位 
+ 276   2      
+ 277   2              T_H=receive_byte();//温度高位 
+ 278   2      
+ 279   2              T_L=receive_byte();//温度低位 
+ 280   2      
+ 281   2              check=receive_byte();//校验位 
+ 282   2      
+ 283   2              io=0; //当最后一bit数据接完毕后从机拉低电平50us// 
+ 284   2      
+ 285   2              for(i=0;i<7;i++)//差不多50us的延时 
+ 286   2      
+ 287   2              delay1(); 
+ 288   2      
+ 289   2              io=1;//总线由上拉电阻拉高进入空闲状态 
+ 290   2      
+ 291   2              num_check=R_H+R_L+T_H+T_L; 
+ 292   2      
+ 293   2              if(num_check==check)//判断读到的四个数据之和是否与校验位相同 
+ 294   2      
+ 295   2              { 
+ 296   3      
+ 297   3                 RH=R_H; 
+ 298   3              
+ 299   3                 RL=R_L; 
+ 300   3              
+ 301   3                 TH=T_H; 
+C51 COMPILER V9.00   LESSON1                                                               04/23/2022 12:17:15 PAGE 6   
+
+ 302   3              
+ 303   3                 TL=T_L; 
+ 304   3      
+ 305   3                 check=num_check; 
+ 306   3      
+ 307   3              } 
+ 308   2      
+ 309   2        } 
+ 310   1      
+ 311   1      } 
+ 312          
+ 313          //*****************************************************************************
+ 314          
+ 315           
+ 316          
+ 317          void main()//主函数模块// 
+ 318          
+ 319          { 
+ 320   1      
+ 321   1        lcd_init();//初始化LCD 
+ 322   1      
+ 323   1        while(1) 
+ 324   1      
+ 325   1        { 
+ 326   2      
+ 327   2          receive();//接收数据 
+ 328   2      
+ 329   2               display(0x00,'R');//LCD的第一行显示 
+ 330   2              
+ 331   2               display(0x01,':'); 
+ 332   2              
+ 333   2               display(0x02,RH/10+0x30); //0x30表示带字库的LCD1602中0x30的位置放有数字0RH/10+0x30即表示湿度的十位数
+             -字在字库RH/10+0x30的位置处放着 
+ 334   2              
+ 335   2               display(0x03,RH%10+0x30); 
+ 336   2              
+ 337   2               display(0X04,'%'); 
+ 338   2              
+ 339   2               display(0x40,'T');//LCD的第二行显示 
+ 340   2              
+ 341   2               display(0x41,':'); 
+ 342   2              
+ 343   2               display(0x42,TH/10+0x30); 
+ 344   2              
+ 345   2               display(0x43,TH%10+0x30); 
+ 346   2              
+ 347   2               display(0x44,0xdf);//以下两个是温度单位的处理 
+ 348   2              
+ 349   2               display(0x45,0x43); 
+ 350   2      
+ 351   2        } 
+ 352   1      } 
+ 353          
+ 354          
+ 355          
+ 356          
+ 357          
+ 358          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    424    ----
+C51 COMPILER V9.00   LESSON1                                                               04/23/2022 12:17:15 PAGE 7   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

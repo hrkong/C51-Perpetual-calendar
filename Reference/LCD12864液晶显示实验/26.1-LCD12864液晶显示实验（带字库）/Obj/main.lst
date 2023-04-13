@@ -1,0 +1,57 @@
+C51 COMPILER V9.00   MAIN                                                                  06/26/2022 23:12:17 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Obj\main.obj
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE User\main.c BROWSE INCDIR(.\App\24c02;.\App\iic;.\App\key;.\App\smg;.\Public
+                    -;.\App\ds18b20;.\App\ds1302;.\App\ired;.\App\time;.\App\xpt2046;.\App\pwm;.\App\lcd1602;.\App\lcd12864) DEBUG OBJECTEXTE
+                    -ND PRINT(.\Obj\main.lst) OBJECT(.\Obj\main.obj)
+
+line level    source
+
+   1          /**************************************************************************************
+   2          深圳市普中科技有限公司（PRECHIN 普中）
+   3          技术支持：www.prechin.net
+   4          
+   5          实验名称：LCD12864液晶显示实验（带字库）
+   6          接线说明：      
+   7          实验现象：下载程序后，LCD12864上显示汉字字符信息
+   8          注意事项：                                                                                                                                                                
+   9          ***************************************************************************************/
+  10          #include "public.h"
+  11          #include "lcd12864.h"
+  12          
+  13          
+  14          /*******************************************************************************
+  15          * 函 数 名       : main
+  16          * 函数功能               : 主函数
+  17          * 输    入       : 无
+  18          * 输    出       : 无
+  19          *******************************************************************************/
+  20          void main()
+  21          {       
+  22   1              lcd12864_init();//LCD12864初始化
+  23   1      
+  24   1              lcd12864_show_string(0,0,"Hello World!");//第1行字符串显示
+  25   1              lcd12864_show_string(0,1,"大家好！");//第2行字符串显示
+  26   1              lcd12864_show_string(0,2,"欢迎使用51开发板");//第3行字符串显示
+  27   1              lcd12864_show_string(0,3,"好好学习天天向上");//第4行字符串显示
+  28   1              while(1)
+  29   1              {
+  30   2                      
+  31   2              }       
+  32   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     56    ----
+   CONSTANT SIZE    =     56    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

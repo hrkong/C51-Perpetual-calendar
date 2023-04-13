@@ -1,0 +1,198 @@
+C51 COMPILER V9.00   MAIN                                                                  04/23/2022 11:45:18 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\C51\C51\BIN\C51.EXE main.c BROWSE DEFINE(DEBUG_ENABLE_SEMIHOST) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /*
+   2          使用DHT11模块，检测温湿度，在lcd1602上面显示，因为1602显示不是每次都能出来，所以加了串口打印，会更加直观。
+   3          */
+   4          #include <reg51.h>
+   5          #include "lcd.h"
+   6          #include <intrins.h>
+   7          #include <stdio.h>
+   8           
+   9          sbit Temp_data=P3^6;    //信号引脚
+  10           
+  11          unsigned int rec_dat[4];
+  12          unsigned char rec_dat_lcd0[6];
+  13          unsigned char rec_dat_lcd1[6];
+  14          unsigned char rec_dat_lcd2[6];
+  15          unsigned char rec_dat_lcd3[6];
+  16           
+  17          void DHT11_delay_us(unsigned char n);
+  18          void DHT11_delay_ms(unsigned int z);
+  19          void DHT11_start();
+  20          unsigned char DHT11_rec_byte();
+  21          void DHT11_receive();
+  22          void InitUART(void);
+  23           
+  24          //主函数
+  25          void main()
+  26          {       
+  27   1              InitUART();     //串口中断初始化
+  28   1              P1=0xf0;
+  29   1              InitLcd1602();
+  30   1              LcdShowStr(0,0,"Shidu:");
+  31   1              LcdShowStr(0,1,"Wendu:");
+  32   1       
+  33   1              while(1)
+  34   1              {
+  35   2                      DHT11_delay_ms(150);
+  36   2                      DHT11_receive();
+  37   2       
+  38   2                      //这个函数是打印字符函数，应该是起到数值转化的作用。
+  39   2                      sprintf(rec_dat_lcd0,"%d",rec_dat[0]);
+  40   2                      sprintf(rec_dat_lcd1,"%d",rec_dat[1]);
+  41   2                      sprintf(rec_dat_lcd2,"%d",rec_dat[2]);
+  42   2                      sprintf(rec_dat_lcd3,"%d",rec_dat[3]);
+  43   2                      DHT11_delay_ms(100);
+  44   2                      
+  45   2                      //湿度
+  46   2                      LcdShowStr(7,0,rec_dat_lcd0);
+  47   2                      LcdShowStr(9,0,".");
+  48   2                      LcdShowStr(10,0,rec_dat_lcd1);
+  49   2                      LcdShowStr(11,0,"%");
+  50   2                      
+  51   2                      //温度
+  52   2                      LcdShowStr(7,1,rec_dat_lcd2);
+  53   2                      LcdShowStr(9,1,".");
+  54   2                      LcdShowStr(10,1,rec_dat_lcd3);
+  55   2                      LcdShowStr(11,1,"C");
+C51 COMPILER V9.00   MAIN                                                                  04/23/2022 11:45:18 PAGE 2   
+
+  56   2                              
+  57   2                      //下面通过串口助手打印温度
+  58   2                      //我也为什么他不用中断服务函数，就可以打印，那好需要这个中断干嘛，不是可以直接打印吗？这是我的疑问。
+  59   2                      printf("Humi:%d.%d \n",rec_dat[0],rec_dat[1]);
+  60   2                      printf("Temp:%d.%d °C\n",rec_dat[2],rec_dat[3]);                       
+  61   2              }
+  62   1      }
+  63           
+  64          //DHT11起始信号
+  65          void DHT11_start()      
+  66          {
+  67   1              Temp_data=1;
+  68   1              
+  69   1              DHT11_delay_us(2);
+  70   1              
+  71   1              Temp_data=0;
+  72   1              
+  73   1              DHT11_delay_ms(20);
+  74   1              
+  75   1              Temp_data=1;
+  76   1              
+  77   1              DHT11_delay_us(13);
+  78   1      }
+  79           
+  80          //接收一个字节
+  81          unsigned char DHT11_rec_byte()
+  82          {       
+  83   1              unsigned char i;
+  84   1              unsigned char dat=0;  //0000 0000
+  85   1      
+  86   1                      
+  87   1              for(i=0;i<8;i++)  //循环8次
+  88   1              {
+  89   2                      while(!Temp_data); //等待DHT 50us低电平信号过去
+  90   2                      DHT11_delay_us(30);//延时大概30us 如何还是高电平 则为1 
+  91   2                      
+  92   2      
+  93   2                      dat<<=1; //左移一位 因为数据是从高位开始传
+  94   2                      if(Temp_data == 1)
+  95   2                      {
+  96   3                              dat|=0x01;
+  97   3                      }
+  98   2                      else
+  99   2                      {
+ 100   3                              dat|=0x00;
+ 101   3                      }        
+ 102   2              
+ 103   2                      while(Temp_data); //等待DHT 拉低 准备下一位开始
+ 104   2      
+ 105   2              }
+ 106   1              return dat;
+ 107   1      }
+ 108           
+ 109          //接收温湿度数据
+ 110          void DHT11_receive()
+ 111          {
+ 112   1              unsigned int R_H,R_L,T_H,T_L;
+ 113   1              unsigned char RH,RL,TH,TL,revise;
+ 114   1              
+ 115   1              DHT11_start();
+ 116   1              Temp_data=1;
+ 117   1              if(Temp_data==0)
+C51 COMPILER V9.00   MAIN                                                                  04/23/2022 11:45:18 PAGE 3   
+
+ 118   1              {
+ 119   2                      while(Temp_data==0);   //等待拉高     
+ 120   2              //DHT11_delay_us(40);  //拉高后延时80us
+ 121   2                      
+ 122   2              R_H=DHT11_rec_byte();    //接收湿度高八位  
+ 123   2              R_L=DHT11_rec_byte();    //接收湿度低八位  
+ 124   2              T_H=DHT11_rec_byte();    //接收温度高八位  
+ 125   2              T_L=DHT11_rec_byte();    //接收温度低八位
+ 126   2              revise=DHT11_rec_byte(); //接收校正位
+ 127   2       
+ 128   2              //DHT11_delay_us(25);    //结束
+ 129   2       
+ 130   2              if((R_H+R_L+T_H+T_L)==revise)      //校正
+ 131   2              {
+ 132   3                  RH=R_H;
+ 133   3                  RL=R_L;
+ 134   3                  TH=T_H;
+ 135   3                  TL=T_L;
+ 136   3              
+ 137   3              } 
+ 138   2              /*数据处理，方便显示*/
+ 139   2              rec_dat[0]=RH;
+ 140   2              rec_dat[1]=RL;
+ 141   2              rec_dat[2]=TH;
+ 142   2              rec_dat[3]=TL;
+ 143   2              }       
+ 144   1      }
+ 145          //延时us   --2*n+5us
+ 146          void DHT11_delay_us(unsigned char n)
+ 147          {
+ 148   1          while(--n);
+ 149   1      }
+ 150           
+ 151          //延时ms
+ 152          void DHT11_delay_ms(unsigned int z)
+ 153          {
+ 154   1         unsigned int i,j;
+ 155   1         for(i=z;i>0;i--)
+ 156   1            for(j=110;j>0;j--);
+ 157   1      }
+ 158           
+ 159          //使用定时器1作为串口波特率发生器
+ 160          void InitUART(void)
+ 161          {
+ 162   1              TMOD=0x20;                                      //定时器1的工作方式2
+ 163   1              SCON=0x40;                                      //串口通信工作方式1
+ 164   1              REN=1;                                          //允许接收
+ 165   1              TH1=0xFD,TL1=0xFD;              //波特率=9600
+ 166   1              TI=1;                       //这里一定要注意
+ 167   1              TR1=1;  
+ 168   1              EA = 1;                  //开总中断
+ 169   1      }       
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    534    ----
+   CONSTANT SIZE    =     52    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     32      14
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+C51 COMPILER V9.00   MAIN                                                                  04/23/2022 11:45:18 PAGE 4   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
